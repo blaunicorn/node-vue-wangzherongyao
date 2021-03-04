@@ -1,38 +1,180 @@
-# 王者荣耀手机官网与后台管理系统全栈开发学习
+# 【全栈之巅】Node.js + Vue.js 全栈开发王者荣耀手机端官网和管理后台
+> 本项目是 学习[Bilibili 全栈之巅](https://space.bilibili.com/341919508) 视频教程相关源码
+> https://gitee.com/blaunicorn/node-vue-wangzherongyao
+> 持续更新中... 
 
-#### 介绍
-up站学习-王者荣耀手机官网与后台管理系统全栈开发
-视频资料来源：https://www.bilibili.com/video/BV1A4411Y7fi?p=3&spm_id_from=pageDriver
+# 王者荣耀全栈开发
+部分截图
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0420/182135_13b694a5_4964818.png "NAG1AQN0%5MG@L}R.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0420/182323_789567f4_4964818.png "5I12Y9O{OFE50~CGLO]AYSB_看图王.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0420/182445_259638cf_4964818.png "YILW6Z$UEHQPM(JV](B%RJ.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0420/182453_4089f826_4964818.png "032RSW2(GS3(IO9HLCT2{FK.png")
 
-#### 软件架构
-软件架构说明
+## 部署到服务器上，localhost:3000地址是前台首页不是后台的首页，添加admin才是后台的首页
+#### 0、下载安装 node 和MongoDB server 、 vscode
+#### 1、admin是后台界面部分、web是前台界面部分、server是前后台的后端接口部分
 
+ npm i -g @vue/cli 全局安装vuecli
+```js
+vue create web
 
-#### 安装教程
+```
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+```js
+vue create admin
+```
 
-#### 使用说明
+-g 全局安装
+```js
+  `npm init -y
+  npm i -g nodemon
+  npm run serve //启动后台服务器
+```
+2、安装插件
+全局安装nodemon
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+npm i -g nodemon
 
-#### 参与贡献
+admin端
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+vue add element
+vue add router
+npm install axios
 
+server端
 
-#### 特技
+npm i express@next mongoose cors inflection multer
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+3、server端自定义脚本中用nodemon运行代码
+"serve": "nodemon index.js"
+
+4、分类创建及编辑页(admin/src/views/CategoryEdit.vue)
+```js
+<template>
+  <div class="about">
+     //id 存在现实编辑，否则现实新建
+    <h1>{{id ? "编辑":"新建"}}分类</h1>
+    // 提交表单执行save方法
+    <el-form label-width="120px" @submit.native.prevent="save">
+      <el-form-item label="分类名称" >
+        <el-input v-model="model.name"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" native-type="submit">上传</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+
+<script>
+export default {
+  props:{
+    id:{}
+  },
+  data(){
+    return{
+      model:{}
+    }
+  },
+  methods:{
+    async save(){
+      if(this.id){
+        this.$http.put(`/categories/${this.id}`,this.model)
+      }else{
+        this.$http.post('/categories',this.model)
+      }
+      this.$router.push('/categories/list')
+      this.$message({
+        type:'success',
+        message:'保存成功'
+      })
+    },
+    async fetch(){
+      const res = await this.$http.get(`/categories/${this.id}`)
+      this.model = res.data
+    }
+  },
+  created(){
+    this.id && this.fetch()
+  }
+}
+</script>
+```
+
+## 一、 入门
+1. 项目介绍
+1. 工具安装和环境搭建(nodejs,npm,mongodb)
+1. 初始化项目
+
+## 二、 管理后台
+1. 基于Element UI的后台管理基础界面搭建
+
+1. 创建分类
+1. 分类列表
+1. 修改分类
+1. 删除分类
+1. 子分类
+
+1. **通用 CRUD 接口**
+
+1. 装备管理
+1. 图片上传 (multer)
+
+1. 英雄管理
+1. 编辑英雄 (关联,多选,el-select, multiple)
+1. 技能编辑
+
+1. 文章管理
+1. 富文本编辑器 (quill)
+
+1. 首页广告管理
+
+1. 管理员账号管理 (bcrypt)
+1. 登录页面
+1. 登录接口 (jwt,jsonwebtoken)
+1. 服务端登录校验
+1. 客户端路由限制 (beforeEach, meta)
+1. 上传文件的登录校验 (el-upload, headers)
+
+## 三、移动端网站
+
+1. "工具样式"概念和 SASS (SCSS)
+1. 样式重置
+1. 网站色彩和字体定义 (colors, text)
+1. 通用flex布局样式定义 (flex)
+1. 常用边距定义 (margin, padding)
+1. 主页框架和顶部菜单
+1. 首页顶部轮播图片 (vue swiper)
+1. 使用精灵图片 (sprite)
+1. 使用字体图标 (iconfont)
+1. 卡片组件 (card)
+1. 列表卡片组件 (list-card, nav, swiper)
+1. 首页新闻资讯-数据录入(+后台bug修复)
+1. 首页新闻资讯-数据接口
+1. 首页新闻资讯-界面展示
+1. 首页英雄列表-提取官网数据
+1. 首页英雄列表-录入数据
+1. 首页英雄列表-界面展示
+1. 新闻详情页
+1. 新闻详情页-完善
+1. 英雄详情页-1-前端准备
+1. 英雄详情页-2-后台编辑
+1. 英雄详情页-3-前端顶部
+1. 英雄详情页-4-完善
+
+## 四、发布和部署 (阿里云)
+
+1. 生产环境编译
+1. 购买域名和服务器
+1. 域名解析
+1. Nginx 安装和配置
+1. MongoDB数据库的安装和配置
+1. git 安装、配置ssh-key
+1. Node.js 安装、配置淘宝镜像
+1. 拉取代码，安装pm2并启动项目
+1. 配置 Nginx 的反向代理
+1. 迁移本地数据到服务器 (mongodump)
+
+## 五、进阶
+1. 使用免费SSL证书启用HTTPS安全连接
+1. 使用阿里云OSS云存储存放上传文件
