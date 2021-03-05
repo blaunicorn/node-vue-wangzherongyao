@@ -26,11 +26,11 @@ vue create admin
 
 -g 全局安装
 ```js
-  `npm init -y
+  npm init -y
   npm i -g nodemon
   npm run serve //启动后台服务器
 ```
-2、安装插件
+#### 2、安装插件
 全局安装nodemon
 
 npm i -g nodemon
@@ -42,13 +42,13 @@ vue add router
 npm install axios
 
 server端
-
+    // 下一个版本  联接mongodb数据库 跨域 
 npm i express@next mongoose cors inflection multer
 
-3、server端自定义脚本中用nodemon运行代码
+#### 3、server端自定义脚本中用nodemon运行代码
 "serve": "nodemon index.js"
 
-4、分类创建及编辑页(admin/src/views/CategoryEdit.vue)
+#### 4、分类创建及编辑页(admin/src/views/CategoryEdit.vue)
 ```js
 <template>
   <div class="about">
@@ -100,6 +100,261 @@ export default {
 }
 </script>
 ```
+
+
+##### 4.1、admin 端请求接口放在http.js中(admin/src/http.js)
+```js
+import axios from 'axios'
+
+const http = axios.create({
+    baseURL:'http://localhost:3000/admin/api'
+})
+
+export default http
+```
+
+##### 4.2、在Main.js中引用http.js(admin/src/main.js)
+```js
+import http from './http'
+Vue.prototype.$http = http
+```
+
+##### 4.3、server端新建数据库、建立数据库模型、设置增删改查路由
+```js
+// 后端连接数据库(server/plugins/db.js)
+module.exports = app =>{
+    const mongoose = require('mongoose')
+    mongoose.connect('mongodb://127.0.0.1:27017/node-vue-moba',{
+        useNewUrlParser: true
+    })
+}
+```
+```js
+// 创建表模板(server/models/Category.js)
+const mongoose = require('mongoose')
+const schema = new mongoose.Schema({
+    name:{type:String}
+})
+module.exports = mongoose.model('Category',schema)
+```
+```js
+// 写后端接口(server/route/admin/index.js)
+module.exports = app =>{
+    const express = require('express')
+    const router = express.Router()
+    const Category = require('../../models/Category')
+    // 增
+    router.post('/categories',async(req,res)=>{
+       const model = await Category.create(req.body)
+       res.send(model)
+    })
+    // 改
+    router.put('/categories/:id',async(req,res)=>{
+        const model = await Category.findByIdAndUpdate(req.params.id,req.body)
+        res.send(model)
+     })
+    //删
+    router.delete('/categories/:id',async(req,res)=>{
+        const model = await Category.findByIdAndDelete(req.params.id,req.body)
+        res.send({
+            success: true
+        })
+    })
+    // 查
+    router.get('/categories',async(req,res)=>{
+        const items = await Category.find().limit(10)
+        res.send(items)
+     })
+     router.get('/categories/:id',async(req,res)=>{
+        const model = await Category.findById(req.params.id)
+        res.send(model)
+     })
+    app.use('/admin/api',router)
+}
+```
+
+```js
+// 监听端口(server/index.js)
+const express = require('express')
+const app = express()
+app.use(express.json())
+app.use(require('cors')())
+require('./plugins/db')(app)
+require('./route/admin')(app)
+app.listen(3000,()=>{
+    console.log('http://localhost:3000')
+})
+```
+
+##### 4.4 admin端定义vue-router路由
+```js
+// admin端路由定义(admin/src/router/index.js)
+const routes = [
+    {
+        path: '/',
+        name: 'Main',
+        component: () => import(/* webpackChunkName: "main" */ '../views/Main.vue'),
+        children: [
+            {
+                path: '/categories/create',
+                name: 'CategoriyEdit',
+                component: () => import('../views/CategoriyEdit.vue')
+            }
+        ]
+    }
+]
+```
+##### 4.5 父类编辑 axios 传参、接收参数
+```js
+    // 查
+    router.get('/categories', async (req, res) => {
+        // console.log(req.query)
+        const limit = +req.query.limit || 10
+        const model = await Category.find().limit(limit)
+        res.send(model)
+    })
+```
+```js
+      async fetch() {
+        const params = {
+          limit: 10,
+        };
+        // 查询字符串传参 用 req.query接收   eg. http://localhost:9999/axios?id=1000  服务端 app.get('/axios', (req, res)
+        // restful风格URL  传参 用req.params.id 接收 eg.http://localhost:9999/axios/1000  服务端需要:id
+        const res = await this.$http.get('categories', { params });
+        console.log(res);
+        this.items = res.data;
+      },
+```
+#### 5 父类子类增删改查
+##### 5.1、编辑页面添加选择父类按钮
+```js
+
+      <el-form-items label="上级分类">
+        <el-select v-model="model.parent">
+           //上级分类选择,label是显示的内容，value是实际保存的值
+          <el-option v-for="item in parents" :key="item._id" :label="item.name" :value="item._id"></el-option>
+        </el-select>
+      </el-form-items>
+
+<script>
+export default {
+  data(){
+    return{
+      parents: []
+    }
+  },
+  methods:{
+    async fetchParents(){
+      const res = await this.$http.get(`/categories`)
+      this.parents = res.data
+    }
+  },
+  created(){
+    this.fetchParents()
+  }
+}
+</script>
+```
+##### 5.2、列表页显示父级分类
+```js
+      <el-table-column prop="parent.name" label="上级分类"></el-table-column>
+```
+##### 5.3、server端模型中添加parent字段
+```js
+    //数据库里面的ID叫Objectid，ref表示关联的模型
+    parent:{type:mongoose.SchemaTypes.ObjectId,ref:'Category'}
+```
+##### 54、修改后端接口
+```js
+    // populate关联取出
+    router.get('/categories',async(req,res)=>{
+        const items = await Category.find().populate('parent').limit(10)
+        res.send(items)
+     })
+```
+#### 6.通用CRUD,如果使用，需要 保证通用性稳定性和拓展性
+
+##### 6.1、添加mergeParams
+```js
+    //合并URL参数，将父级的参数合并到router里面
+
+    const router = express.Router({   
+        mergeParams: true
+    })
+```
+
+##### 6.2、动态获取接口地址并在请求对象上挂载Model属性
+```js
+    //  动态获取接口地址:resource,中间件处理请求模板
+    app.use('/admin/api/rest/:resource',async(req,res,next)=>{
+        const modelName = require('inflection').classify(req.params.resource)
+        // req.Model是在请求对象上挂载Model属性
+        req.Model = require(`../../models/${modelName}`)
+        next()
+    },router)
+```
+##### 6.3、后端接口代码如下
+```js
+module.exports = app =>{
+    const express = require('express')
+    const router = express.Router({
+        //合并URL参数，将父级的参数合并到router里面
+        mergeParams: true
+    })
+    // 增
+    router.post('/',async(req,res)=>{
+        const model = await req.Model.create(req.body)
+        res.send(model)
+    })
+    // 改
+    router.put('/:id',async(req,res)=>{
+        const model = await req.Model.findByIdAndUpdate(req.params.id,req.body)
+        res.send(model)
+     })
+    //删
+    router.delete('/:id',async(req,res)=>{
+        const model = await req.Model.findByIdAndDelete(req.params.id,req.body)
+        res.send({
+            success: true
+        })
+    })
+    // 查，populate关联取出
+    router.get('/',async(req,res)=>{
+        // const items = await req.Model.find().populate('parent').limit(10)
+        const queryOptions = {}
+        if(req.Model.modelName === 'Category'){
+            queryOptions.populate = 'parent'
+        }
+        const items = await req.Model.find().setOptions(queryOptions).limit(10)
+        res.send(items)
+     })
+     router.get('/:id',async(req,res)=>{
+        const model = await req.Model.findById(req.params.id)
+        res.send(model)
+     })
+    //  动态获取接口地址:resource,中间件处理请求模板
+    app.use('/admin/api/rest/:resource',async(req,res,next)=>{
+        const modelName = require('inflection').classify(req.params.resource)
+        // req.Model是在请求对象上挂载Model属性
+        req.Model = require(`../../models/${modelName}`)
+        next()
+    },router)
+```
+##### 6.3、修改前端请求接口
+```js
+//请求接口前面加上/rest
+//编辑/新建页
+this.$http.put(`/rest/categories/${this.id}`,this.model)
+this.$http.post('/rest/categories',this.model)
+const res = await this.$http.get(`/rest/categories/${this.id}`)
+const res = await this.$http.get(`/rest/categories`)
+
+//列表页
+const res = await this.$http.get('/rest/categories')
+await this.$http.delete(`/rest/categories/${row._id}`)
+```
+当通用接口做完后，其他的items和heros的接口也就比较简单了。
 
 ## 一、 入门
 1. 项目介绍
