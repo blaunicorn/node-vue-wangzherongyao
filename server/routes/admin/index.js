@@ -13,7 +13,7 @@ module.exports = app => {
     router.post('/', async (req, res) => {
         // 把数据存入数据库
 
-        const Model = require(`../../models/${req.params.resource}`) // 通用crud时，增加通用模型，需要把${req.params.resource} 转化为类名既大写单数形式
+        // const Model = require(`../../models/${req.params.resource}`) // 通用crud时，增加通用模型，需要把${req.params.resource} 转化为类名既大写单数形式
         const model = await req.Model.create(req.body) // 把所有Category替换为req.Model
         // const model = await Category.create(req.body)
         //  发回客户端，让客户端知道创建完成，同时创建的数据是什么，下一步去前端发起请求
@@ -34,7 +34,7 @@ module.exports = app => {
         if (req.Model.modelName === 'Category') {
             queryOptions.populate = 'parent'
         }
-        const items = await req.Model.find().setOptions({
+        const model = await req.Model.find().setOptions({
             queryOptions
         }).limit(limit)
         // const model = await req.Model.find().populate('parent').limit(limit) // 同时取出关联字段，关联字段就可以变成个对象
@@ -72,9 +72,22 @@ module.exports = app => {
         //  放在前置的中间件内，请求时会先用async处理 url
         const modelName = require('inflection').classify(req.params.resource) // 通用crud时，转类名转为大写单数
         const Model = require(`../../models/${modelName}`) // 通用crud时，增加通用模型
+        console.log(modelName, Model)
         // req.Model是在请求对象上挂载Model属性
         req.Model = Model
         next()
     }, router)
     // app.use('/admin/api/rest/:resource', router)
+
+    // 处理上传文件
+    // 增加中间件 npm i multer 
+    const multer = require('multer') // 引入module 模块
+    const upload = multer({ dest: __dirname + '/../../uploads' })  // 定义一个中间件，并执行它,同时传递一个参数dest ，目标地址是哪里(当前文件夹 退两级) ， __dirname为绝对地址
+    app.post('/admin/api/upload', upload.single('file'), async (req, res) => { // upload.singel('file) 接收单一文件，文件名为file
+        const file = req.file // 是通过multer中间件增加的req.file对象
+        file.url = `http://localhost:3000/uploads/${file.filename}`
+        res.send(file)  // 返回前段需要定义一个静态的文件并把路径返回给前端
+    })
+
+
 }
