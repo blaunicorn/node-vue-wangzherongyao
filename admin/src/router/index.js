@@ -33,6 +33,38 @@ const routes = [
                 path: '/categories/list',
                 name: 'CategoriesList',
                 component: () => import('../views/CategoriesList.vue')
+            },
+            {
+                path: '/item/create',
+                name: 'ItemCreate',
+                component: () => import('../views/ItemEdit.vue')
+            },
+            {
+                path: '/item/edit/:id',
+                name: 'ItemEdit',
+                component: () => import('../views/ItemEdit.vue'),
+                props: true // 允许参数注入
+            },
+            {
+                path: '/item/list',
+                name: 'ItemList',
+                component: () => import('../views/ItemList.vue')
+            },
+            {
+                path: '/hero/create',
+                name: 'HeroCreate',
+                component: () => import('../views/HeroEdit.vue')
+            },
+            {
+                path: '/hero/edit/:id',
+                name: 'HeroEdit',
+                component: () => import('../views/HeroEdit.vue'),
+                props: true // 允许参数注入
+            },
+            {
+                path: '/hero/list',
+                name: 'HeroList',
+                component: () => import('../views/HeroList.vue')
             }
         ]
     }

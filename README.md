@@ -14,8 +14,9 @@
 #### 0、下载安装 node 和MongoDB server 、 vscode
 #### 1、admin是后台界面部分、web是前台界面部分、server是前后台的后端接口部分
 
- npm i -g @vue/cli 全局安装vuecli
+ npm i -g @vue/cli 全局安装vuecli,-g 全局安装
 ```js
+
 vue create web
 
 ```
@@ -24,8 +25,9 @@ vue create web
 vue create admin
 ```
 
--g 全局安装
+
 ```js
+  // 新建server文件夹，并在其下
   npm init -y
   npm i -g nodemon
   npm run serve //启动后台服务器
@@ -335,6 +337,7 @@ module.exports = app =>{
      })
     //  动态获取接口地址:resource,中间件处理请求模板
     app.use('/admin/api/rest/:resource',async(req,res,next)=>{
+        // 通用接口的类名转换成数据库一致的方法使用是inflection,把小写的复数名称改成大写开头的单数类名（也可以用lodash去尝试）
         const modelName = require('inflection').classify(req.params.resource)
         // req.Model是在请求对象上挂载Model属性
         req.Model = require(`../../models/${modelName}`)
@@ -355,6 +358,670 @@ const res = await this.$http.get('/rest/categories')
 await this.$http.delete(`/rest/categories/${row._id}`)
 ```
 当通用接口做完后，其他的items和heros的接口也就比较简单了。
+#### 7、物品管理
+##### 7.1、Main.vue中左侧side添加物品列表
+        <el-menu-item-group>
+          <template slot="title">物品</template>
+          <el-menu-item index="/items/create">新建物品</el-menu-item>
+          <el-menu-item index="/items/list">物品列表</el-menu-item>
+        </el-menu-item-group>
+
+##### 7.2、复制Category编辑页和列表页为ItemEdit.vue和ItemList.vue并修改页面代码
+ItemEdit.vue
+
+<template>
+  <div class="about">
+    <h1>{{id ? "编辑":"新建"}}物品</h1>
+    <el-form label-width="120px" @submit.native.prevent="save">
+      <el-form-item label="分类名称" >
+        <el-input v-model="model.name"></el-input>
+      </el-form-item>
+      <el-form-item label="图标" >
+        <el-input v-model="model.icon"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" native-type="submit">上传</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+
+<script>
+export default {
+  props:{
+    id:{}
+  },
+  data(){
+    return{
+      model:{},
+      parents: []
+    }
+  },
+  methods:{
+    async save(){
+      if(this.id){
+        this.$http.put(`/rest/items/${this.id}`,this.model)
+      }else{
+        this.$http.post('/rest/items',this.model)
+      }
+      this.$router.push('/items/list')
+      this.$message({
+        type:'success',
+        message:'保存成功'
+      })
+    },
+    async fetch(){
+      const res = await this.$http.get(`/rest/items/${this.id}`)
+      this.model = res.data
+    },
+    async fetchParents(){
+      const res = await this.$http.get(`/rest/items`)
+      this.parents = res.data
+    }
+  },
+  created(){
+    this.fetchParents()
+    this.id && this.fetch()
+  }
+}
+</script>
+
+ItemList.vue
+
+<template>
+  <div class="about">
+    <h1>物品列表</h1>
+    <el-table :data="items">
+      <el-table-column prop="_id" label="ID" width="230"></el-table-column>
+      <el-table-column prop="name" label="名称"></el-table-column>
+      <el-table-column
+      fixed="right"
+      label="操作"
+      width="100">
+      <template slot-scope="scope">
+        <el-button @click="$router.push(`/items/create/${scope.row._id}`)" type="text" size="small">编辑</el-button>
+        <el-button @click="remove(scope.row)" type="text" size="small">删除</el-button>
+      </template>
+    </el-table-column>
+    </el-table>
+  </div>
+</template>
+
+
+<script>
+export default {
+  data(){
+    return{
+      items:[]
+    }
+  },
+  methods:{
+    async fetch(){
+      const res = await this.$http.get('/rest/items')
+      this.items = res.data
+    },
+    async remove(row){
+      this.$confirm(`是否要删除分类${row.name}`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async() => {
+          await this.$http.delete(`/rest/items/${row._id}`)
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+          this.fetch()
+        })
+    }
+  },
+  created(){
+    this.fetch()
+  }
+}
+</script>
+
+
+##### 7.3、添加路由
+import ItemEdit from '../views/ItemEdit.vue'
+import ItemList from '../views/ItemList.vue'
+
+      {path:'/items/create',component:ItemEdit},
+      {path:'/items/List',component:ItemList},
+      {path:'/items/create/:id',component:ItemEdit,props:true}
+
+
+##### 7.4、添加模型Item.js
+const mongoose = require('mongoose')
+
+const schema = new mongoose.Schema({
+    name:{type:String},
+    icon:{type:String}
+})
+
+module.exports = mongoose.model('Item',schema)
+
+#### 8. 图片上传
+
+##### 8.1、添加上传文件图标(ItemEdit.vue)
+      <el-form-item label="分类名称" >
+        <el-input v-model="model.name"></el-input>
+      </el-form-item>
+      <el-form-item label="图标" >
+        //:action:表单提交地址,on-success:成功之后做什么,before-upload:上传之后做什么
+        <el-upload
+          class="avatar-uploader"
+          :action="$http.defaults.baseURL + '/upload'"
+          :show-file-list="false"
+          :on-success="afterUpload"
+        >
+          //有图片显示图片，没有则显示上传图标,:src显示的图片
+          <img v-if="model.icon" :src="model.icon" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+      </el-form-item>
+      
+	//js
+    afterUpload(res){
+      console.log(res)
+      //vue提供的方法(赋值主体，赋值的属性，res.url),效果类似this.model.icon = res.url
+      this.$set(this.model,'icon',res.url)
+    }
+    
+    
+<style>
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+</style>
+
+##### 8.2、添加upload文件上传文件夹（server/upload）
+##### 8.3、在server端安装multer中间件处理文件上传
+npm i multer
+
+##### 8.4、写后端接口(server/route/admin/index.js)
+    //使用，multer中间件专门处理数据上传
+    const multer = require('multer')
+    const upload = multer({dest: __dirname + '/../../uploads'})
+    //upload.single：单个文件上传,在req上挂载file属性
+    app.post('/admin/api/upload',upload.single('file'),async(req,res)=>{
+        const file = req.file
+        //将图片的地址拼接出来
+        file.url = `http://localhost:3000/uploads/${file.filename}`
+        res.send(file)
+    })
+    
+    //方法
+   afterUpload(res){
+      console.log(res)
+      //vue提供的方法(赋值主体，赋值的属性，res.url),效果类似this.model.icon = res.url
+      this.$set(this.model,'icon',res.url)
+    }
+
+##### 8.5、为了可以访问图片，创建静态文件托管(server/index.js)
+//静态文件托管后面的'/'不能写成 './' 
+//uploads文件夹里面的东西是静态文件
+app.use('/uploads',express.static(__dirname + '/uploads'))
+
+Nodejs中想要访问的东西都要写接口
+#### 9.英雄管理，比较复杂的英雄编辑页面
+
+##### 9.1、Main.vue中创建英雄列表组
+        <el-menu-item-group>
+          <template slot="title">英雄</template>
+          <el-menu-item index="/heroes/create">新建英雄</el-menu-item>
+          <el-menu-item index="/heroes/list">英雄列表</el-menu-item>
+        </el-menu-item-group>
+
+##### 9.2、新建HeroList.vue和HeroEdit.vue，并在route中增加路由
+HeroEdit.vue
+
+<template>
+  <div class="about">
+    <h1>{{id ? "编辑":"新建"}}英雄</h1>
+    <el-form label-width="120px" @submit.native.prevent="save">
+      <el-form-item label="名称" >
+        <el-input v-model="model.name"></el-input>
+      </el-form-item>
+      <el-form-item label="头像" >
+        <!-- :action:表单提交地址,on-success:成功之后做什么,before-upload:上传之后做什么 -->
+        <el-upload
+          class="avatar-uploader"
+          :action="$http.defaults.baseURL + '/upload'"
+          :show-file-list="false"
+          :on-success="afterUpload"
+        >
+          <!-- 有图片显示图片，没有则显示上传图标,:src显示的图片 -->
+          <img v-if="model.avatar" :src="model.avatar" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" native-type="submit">上传</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+
+<script>
+export default {
+  props:{
+    id:{}
+  },
+  data(){
+    return{
+      model:{
+        name: '',
+        avatar: ''
+      },
+    }
+  },
+  methods:{
+    afterUpload(res){
+      console.log(res)
+      //vue提供的方法(赋值主体，赋值的属性，res.url),效果类似this.model.icon = res.url
+      // this.$set(this.model,'avatar',res.url)
+      //上面data中设置了属性就可以用这个方法了，推荐使用
+      this.model.avatar = res.url
+    },
+    async save(){
+      if(this.id){
+        this.$http.put(`/rest/heroes/${this.id}`,this.model)
+      }else{
+        this.$http.post('/rest/heroes',this.model)
+      }
+      this.$router.push('/heroes/list')
+      this.$message({
+        type:'success',
+        message:'保存成功'
+      })
+    },
+    async fetch(){
+      const res = await this.$http.get(`/rest/heroes/${this.id}`)
+      this.model = res.data
+    },
+    async fetchParents(){
+      const res = await this.$http.get(`/rest/items`)
+      this.parents = res.data
+    }
+  },
+  created(){
+    this.fetchParents()
+    this.id && this.fetch()
+  }
+}
+</script>
+
+<style>
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+</style>
+
+HeroList.vue
+
+<template>
+  <div class="about">
+    <h1>英雄列表</h1>
+    <el-table :data="items">
+      <el-table-column prop="_id" label="ID" width="230"></el-table-column>
+      <el-table-column prop="name" label="名称"></el-table-column>
+      <el-table-column prop="avatar" label="头像">
+        <template slot-scope="scope">
+          <img :src="scope.row.avatar" alt="" style="height:3rem">
+        </template>
+      </el-table-column>
+      <el-table-column
+      fixed="right"
+      label="操作"
+      width="100">
+      <template slot-scope="scope">
+        <el-button @click="$router.push(`/heroes/create/${scope.row._id}`)" type="text" size="small">编辑</el-button>
+        <el-button @click="remove(scope.row)" type="text" size="small">删除</el-button>
+      </template>
+    </el-table-column>
+    </el-table>
+  </div>
+</template>
+
+
+<script>
+export default {
+  data(){
+    return{
+      items:[]
+    }
+  },
+  methods:{
+    async fetch(){
+      const res = await this.$http.get('/rest/heroes')
+      this.items = res.data
+    },
+    async remove(row){
+      this.$confirm(`是否要删除分类${row.name}`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async() => {
+          await this.$http.delete(`/rest/heroes/${row._id}`)
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+          this.fetch()
+        })
+    }
+  },
+  created(){
+    this.fetch()
+  }
+}
+</script>
+
+##### 9.3、路由中引用HeroList.vue和HeroEdit.vue
+import HeroEdit from '../views/HeroEdit.vue'
+import HeroList from '../views/HeroList.vue'
+
+      {path:'/heroes/create',component:HeroEdit},
+      {path:'/heroes/List',component:HeroList},
+      {path:'/heroes/create/:id',component:HeroEdit,props:true}
+
+##### 9.4、添加英雄模型Hero.js
+const mongoose = require('mongoose')
+
+const schema = new mongoose.Schema({
+    name:{type:String},
+    avatar:{type:String},
+    title:{type:String},
+    // 实现多选
+    categories:[{type:mongoose.SchemaTypes.ObjectId,ref:'Category'}],
+    // 评分
+    scores:{
+        difficult:{type:Number},
+        skills:{type:Number},
+        attack:{type:Number},
+        survive:{type:Number}
+    },
+    // 多个技能
+    skills:[{
+        icon:{type:String},
+        name:{type:String},
+        description:{type:String},
+        tips:{type:String}
+    }],
+    // 装备
+    items1:[{type:mongoose.SchemaTypes.ObjectId,ref:'Item'}],
+    items2:[{type:mongoose.SchemaTypes.ObjectId,ref:'Item'}],
+    //使用技巧
+    usageTips:{type:String},
+    //对抗技巧
+    battleTips:{type:String},
+    //团战技巧
+    teamTips:{type:String},
+    //英雄关系
+    partners:[{
+        hero:{type:mongoose.SchemaTypes.ObjectId,ref:'Hero'},
+        description:{type:String}
+    }]
+})
+
+module.exports = mongoose.model('Hero',schema)
+
+##### 9.5、实现复杂的英雄编辑录入页（HeroEdit.vue） (关联,多选,el-select, multiple)
+<template>
+  <div class="about">
+    <h1>{{id ? "编辑":"新建"}}英雄</h1>
+    <el-form label-width="120px" @submit.native.prevent="save">
+      <el-form-item label="名称" >
+        <el-input v-model="model.name"></el-input>
+      </el-form-item>
+
+      <el-form-item label="称号" >
+        <el-input v-model="model.title"></el-input>
+      </el-form-item>
+
+      <el-form-item label="头像" >
+        <!-- :action:表单提交地址,on-success:成功之后做什么,before-upload:上传之后做什么 -->
+        <el-upload
+          class="avatar-uploader"
+          :action="$http.defaults.baseURL + '/upload'"
+          :show-file-list="false"
+          :on-success="afterUpload"
+        >
+          <!-- 有图片显示图片，没有则显示上传图标,:src显示的图片 -->
+          <img v-if="model.avatar" :src="model.avatar" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+      </el-form-item>
+      <el-form-item label="类型" >
+        <!-- 加multiple就可以多选 -->
+        <el-select v-model="model.categories" multiple >
+          <el-option v-for="item of categories" :key="item._id" :label="item.name" :value="item._id"></el-option>
+        </el-select>
+
+
+        <!-- 分数 -->
+      <el-form-item label="难度" >
+        <el-rate style="margin-top:0.6rem" :max="9" show-score v-model="model.scores.difficult"></el-rate>
+      </el-form-item>
+
+        <!-- 分数 -->
+      <el-form-item label="技能" >
+        <el-rate style="margin-top:0.6rem" :max="9" show-score v-model="model.scores.skills"></el-rate>
+      </el-form-item>
+
+
+        <!-- 分数 -->
+      <el-form-item label="攻击" >
+        <el-rate style="margin-top:0.6rem" :max="9" show-score v-model="model.scores.attack"></el-rate>
+      </el-form-item>
+
+
+        <!-- 分数 -->
+      <el-form-item label="生存" >
+        <el-rate style="margin-top:0.6rem" :max="9" show-score v-model="model.scores.survive"></el-rate>
+      </el-form-item>
+
+    </el-form-item>
+
+      <el-form-item label="顺风出装" >
+        <!-- 加multiple就可以多选 -->
+        <el-select v-model="model.items1" multiple >
+          <el-option v-for="item of items" :key="item._id" :label="item.name" :value="item._id"></el-option>
+        </el-select>
+      </el-form-item>
+      
+      <el-form-item label="逆风出装" >
+        <!-- 加multiple就可以多选 -->
+        <el-select v-model="model.items2" multiple >
+          <el-option v-for="item of items" :key="item._id" :label="item.name" :value="item._id"></el-option>
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="使用技巧">
+        <el-input type="textarea" v-model="model.usageTips"></el-input>
+      </el-form-item>
+
+      <el-form-item label="对抗技巧">
+        <el-input type="textarea" v-model="model.battleTips"></el-input>
+      </el-form-item>
+
+      <el-form-item label="团战技巧">
+        <el-input type="textarea" v-model="model.teamTips"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" native-type="submit">上传</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+
+<script>
+export default {
+  props:{
+    id:{}
+  },
+  data(){
+    return{
+      categories:[],
+      items:[],
+      model:{
+        name: '',
+        avatar: '',
+        scores:{
+          difficult:0
+        }
+      },
+    }
+  },
+  methods:{
+    afterUpload(res){
+      console.log(res)
+      //vue提供的方法(赋值主体，赋值的属性，res.url),效果类似this.model.icon = res.url
+      // this.$set(this.model,'avatar',res.url)
+      //上面data中设置了属性就可以用这个方法了，推荐使用
+      this.model.avatar = res.url
+    },
+    async save(){
+      if(this.id){
+        this.$http.put(`/rest/heroes/${this.id}`,this.model)
+      }else{
+        this.$http.post('/rest/heroes',this.model)
+      }
+      this.$router.push('/heroes/list')
+      this.$message({
+        type:'success',
+        message:'保存成功'
+      })
+    },
+    async fetch(){
+      const res = await this.$http.get(`/rest/heroes/${this.id}`)
+      // this.model = res.data
+      this.model = Object.assign({},this.model,res.data)
+    },
+    async fetchCategories(){
+      const res = await this.$http.get(`/rest/categories`)
+      this.categories = res.data
+    },
+    async fetchItems(){
+      const res = await this.$http.get(`/rest/items`)
+      this.items = res.data
+    }
+  },
+  created(){
+    this.fetchCategories()
+    this.fetchItems()
+    this.id && this.fetch()
+  }
+}
+</script>
+
+<style>
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+</style>
+
+##### 9.6、技能编辑=》将英雄编辑页内容用tab包裹区分为basic 和skills 两个tab页
+<el-tab-pane label="技能" name="skills">
+          <!-- type默认为按钮，type="text"为文字链接样式 -->
+          <!-- 数据中skills必须是数组 -->
+          <el-button style="margin-bottom:1rem;" size="small" @click="model.skills.push({})"><i class="el-icon-plus"></i>添加技能</el-button>
+          <el-row type="flex" style="flex-wrap:wrap">
+            <!-- :md="12"表示在普通屏幕上一行显示两个框 -->
+            <el-col :md="12" v-for="(item,i) in model.skills" :key="i">
+              <el-form-item label="名称">
+                <el-input v-model="item.name"></el-input>
+              </el-form-item>
+              <el-form-item label="图标">
+                <!-- 将res.url赋值到item.icon上，res => item.icon = res.url -->
+                <!-- res => $set(item,'icon',res.url,将res.url赋值在item主体的icon属性上 -->
+                <el-upload
+                  class="avatar-uploader"
+                  :action="$http.defaults.baseURL + '/upload'"
+                  :show-file-list="false"
+                  :on-success="res => $set(item,'icon',res.url)"
+                >
+                  <!-- 有图片显示图片，没有则显示上传图标,:src显示的图片 -->
+                  <img v-if="item.icon" :src="item.icon" class="avatar">
+                  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                </el-upload>
+              </el-form-item>
+              <el-form-item label="描述">
+                <!-- 大文本框 -->
+                <el-input v-model="item.description" type="textarea"></el-input>
+              </el-form-item>
+              <el-form-item label="小提示">
+                <el-input v-model="item.tips" type="textarea"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button size="small" type="danger" @click="model.skills.splice(i,1)">删除</el-button>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-tab-pane>
+
+      </el-tabs>
 
 ## 一、 入门
 1. 项目介绍
