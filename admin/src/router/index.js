@@ -65,6 +65,38 @@ const routes = [
                 path: '/hero/list',
                 name: 'HeroList',
                 component: () => import('../views/HeroList.vue')
+            },
+            {
+                path: '/article/create',
+                name: 'ArticleCreate',
+                component: () => import('../views/ArticleEdit.vue')
+            },
+            {
+                path: '/article/edit/:id',
+                name: 'ArticleEdit',
+                component: () => import('../views/ArticleEdit.vue'),
+                props: true // 允许参数注入
+            },
+            {
+                path: '/article/list',
+                name: 'ArticleList',
+                component: () => import('../views/ArticleList.vue')
+            },
+            {
+                path: '/ad/create',
+                name: 'AdCreate',
+                component: () => import('../views/AdEdit.vue')
+            },
+            {
+                path: '/ad/edit/:id',
+                name: 'AdEdit',
+                component: () => import('../views/AdEdit.vue'),
+                props: true // 允许参数注入
+            },
+            {
+                path: '/ad/list',
+                name: 'AdList',
+                component: () => import('../views/AdList.vue')
             }
         ]
     }
