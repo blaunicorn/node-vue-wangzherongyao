@@ -21,7 +21,20 @@
           ><i class="el-icon-plus"></i> 添加广告</el-button
         >
         <el-row type="flex" style="flex-wrap: wrap">
-          <el-col :md="24" v-for="(item, index) in model.items" :key="index">
+          <el-col :md="23" v-for="(item, index) in model.items" :key="index">
+            <el-form-item>
+              <el-tag
+                style="
+                  text-align: center;
+                  border-radius: 5px;
+                  width: 100%;
+                  height: 40px;
+                  line-height: 40px;
+                "
+                type="success"
+                >第{{ index + 1 }}个广告位</el-tag
+              >
+            </el-form-item>
             <el-form-item label="标题">
               <el-input v-model="item.title"></el-input>
             </el-form-item>
@@ -57,6 +70,15 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" native-type="submit">保存</el-button>
+        <el-button
+          type="danger"
+          size="medium"
+          native-type="button"
+          @click="cancel"
+          v-show="this.id"
+          :plain="true"
+          >取消</el-button
+        >
       </el-form-item>
     </el-form>
   </div>
@@ -128,6 +150,10 @@
           message: '创建成功',
         });
         this.$router.push('/ad/list');
+      },
+      //取消保存返回上一页
+      cancel() {
+        this.$router.go(-1);
       },
     },
   };

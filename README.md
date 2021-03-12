@@ -1272,7 +1272,230 @@ const schema = new mongoose.Schema({
 
 // 导出Item模型，哪里需要用，哪里引入，引入到 routes/admin/index.js
 module.exports = mongoose.model('Ad', schema)
+### 13.管理员账号设置
+服务端设置模型  server/models/AdminUser.js
+const mongoose = require('mongoose')
 
+const schema = new mongoose.Schema({
+    username: { type: String },
+    password: { type: String }
+})
+
+module.exports = mongoose.model('AdminUser', schema)
+
+管理端main.vue页面设置联接
+
+router/index.js设置路由
+服务端 密码加盐 
+npm i bcrypt  // 因gyp错误未安装成功，改成
+npm install bcryptjs
+let bcrypt= require('bcryptjs')
+const mongoose = require('mongoose')
+
+const schema = new mongoose.Schema({
+    username: { type: String },
+    password: {
+        type: String,
+        required: true,
+        select: false,//防止查询出密码，此时前端查询返回的密码值为空
+        set(val) {
+            // 散列同步方法,第二个参数为加密指数
+            return require('bcryptjs').hashSync(val, 12)
+        }
+    }
+})
+
+module.exports = mongoose.model('AdminUser', schema)
+
+### 14.后台登录页面
+<template>
+  <div class="login-container">
+    <video
+      autoplay
+      muted
+      loop
+      poster="../assets/bg.jpg"
+      class="bgvid"
+      id="bgvid"
+    >
+      <!-- <source src="../assets/bg.mp4" type="video/mp4" /> -->
+    </video>
+    <el-card header="请先登录" class="login-card">
+      <el-form label-width="70px" @submit.native.prevent="login">
+        <el-form-item label="用户名">
+          <el-input
+            prefix-icon="el-icon-user-solid"
+            v-model="model.username"
+            required
+            minlength="3"
+            maxlength="20"
+            placeholder="name"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input
+            type="password"
+            prefix-icon="el-icon-s-opportunity"
+            clearable
+            required
+            maxlength="20"
+            error
+            v-model="model.password"
+            placeholder="password"
+            minlength="5"
+            show-password
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          style="display: flex; justify-content: space-between; flex-wrap: wrap"
+        >
+          <el-button type="primary" native-type="submit">登录</el-button>
+          <el-button type="primary" @click="afterpage">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+  </div>
+</template>
+<script>
+  export default {
+    data() {
+      return {
+        model: {},
+      };
+    },
+    created() {
+      this.model = {};
+    },
+    methods: {
+      async login() {
+        const res = await this.$http.post('login', this.model);
+        console.lo(res);
+      },
+      afterpage() {},
+    },
+  };
+</script>
+<style scoped>
+  #bgvid {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -2;
+    background: url(../assets/bg.jpg) no-repeat;
+    background-size: cover;
+  }
+  .login-card {
+    width: 20rem;
+    margin: 5rem auto;
+  }
+  .login-container {
+    text-align: center;
+  }
+</style>
+server/routes/admin/index.js
+    // 新建登录接口
+    app.post('/admin/api/login', async (req, res) => {
+        // 结构赋值
+        const { username, password } = req.body
+        // 1.根据用户名找用户,引入模型，定义方法
+        const AdminUser = require('../../models/AdminUser')
+        // 简化 {username：username}
+        const user = await AdminUser.findOne({ username })
+        if (!user) {
+            return res.status(422).send({ message: '用户不存在' })
+        }
+        // 2.校验密码
+
+        // 3.返回token，如果是错误，则在http.js中拦截器统一处理
+        res.send({ code: 20000, message: 'ok' })
+    })
+
+    admin/http.js
+// 统一处理http错误
+http.interceptors.response.use(res => {
+    return res
+}, err => {
+    console.log(err, err.response)
+    if (err.response.data.message) {
+        // console.log(err.response.data.message)
+        // 统一处理时， 用vue的实例弹出这个错误
+        Vue.prototype.$message({
+            type: 'error',
+            message: err.response.data.message
+        })
+    }
+
+    return Promise.reject(err)
+})
+// 优化登录接口，增加密码校验和生成token
+    // 登录接口
+    app.post('/admin/api/login', async (req, res) => {
+        // 结构赋值
+        const { username, password } = req.body
+        // 1.根据用户名找用户,引入模型，定义方法
+        const AdminUser = require('../../models/AdminUser')
+        // 简化 {username：username}
+        const user = await AdminUser.findOne({ username }).select('+password')
+        if (!user) {
+            return res.status(422).send({ message: '用户不存在' })
+        }
+        // 2.校验密码
+        // 比较密码,返回布尔值.数据表密码设置select为false不可读取,此时需要强制取出密码 findOne.select('+item')
+        const isValid = require('bcryptjs').compareSync(password, user.password)
+        if (!isValid) {
+            return res.status(422).send({ message: '密码校验错误' })
+        }
+
+        // 3.返回token，如果是错误，则在http.js中拦截器统一处理
+        // npm i jsonwebtoken
+        // 
+        const jwt = require('jsonwebtoken')
+
+        // 签名，生成token,加密返回,get会和路由冲突，通过参数的设置让路由进行判断
+        const token = jwt.sign({ id: user.id }, app.get('secret'))
+        res.send({ code: 20000, message: 'ok', data: { token } })
+    })
+    // 2 - 19 继续增加中间件，校验用户是否登录, 此时在前端头上添加token
+    //前端 http.js
+    // 2-19 请求拦截器，增加token header
+http.interceptors.request.use(config => {
+    //标准授权请求头
+    config.headers.Authorization = 'Bearer ' + localStorage.token || ''
+    return config
+}, error => {
+    return Promise.reject(error)
+})
+        // 后端
+        // 单独引入 AdminUser模型，供后期调用
+    const AdminUser = require('../../models/AdminUser')
+    //引用校验token
+    const jwt = require('jsonwebtoken')
+    router.get('/', async (req, res, next) => {
+        const token = String(req.headers.authorization || '').split(' ').pop()
+        console.log(token)
+        // const tokenData = jwt.verify(token, app.get('secret'), (err, data) => {
+        //     console.log(err, data)
+        //     if (err && err.message === 'invalid token') return res.send({ message: '无效 token', code: 0 })
+
+        //     if (err && err.message === 'jwt expired') return res.send({ message: 'token 失效', code: 0 })
+
+        //    
+        // })
+        // tokenData: {id:'String',iat: 'Number'} 既解析出了id
+        const { id } = jwt.verify(token, app.get('secret'))
+        // // 把用户信息挂载到req上
+        req.user = await AdminUser.findById(id)
+        console.log(req.user)
+        next()
+
+    }, async (req, res) => {})
+  
+      // node.js服务端报错使用http-assert，能够很方便的返回错误
+    // 2-19 继续增加 npm install http-assert 这个是node.js下判断条件是否成立。用法： assert（确保条件存在，如果不存在抛出什么状态码，信息是什么)
 ## 一、 入门
 1. 项目介绍
 1. 工具安装和环境搭建(nodejs,npm,mongodb)

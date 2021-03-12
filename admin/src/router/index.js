@@ -5,8 +5,14 @@ import Home from '../views/Home.vue'
 Vue.use(VueRouter)
 
 const routes = [
+
     {
-        path: '/hoem',
+        path: '/login',
+        name: 'Login',
+        component: () => import('../views/Login.vue')
+    },
+    {
+        path: '/home',
         name: 'Home',
         component: Home
     },
@@ -97,6 +103,22 @@ const routes = [
                 path: '/ad/list',
                 name: 'AdList',
                 component: () => import('../views/AdList.vue')
+            },
+            {
+                path: '/admin_user/create',
+                name: 'AdminUserCreate',
+                component: () => import('../views/AdminUserEdit.vue')
+            },
+            {
+                path: '/admin_user/edit/:id',
+                name: 'AdminUserEdit',
+                component: () => import('../views/AdminUserEdit.vue'),
+                props: true // 允许参数注入
+            },
+            {
+                path: '/admin_user/list',
+                name: 'AdminUserList',
+                component: () => import('../views/AdminUserList.vue')
             }
         ]
     }
