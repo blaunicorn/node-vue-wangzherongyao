@@ -9,7 +9,8 @@ const routes = [
     {
         path: '/login',
         name: 'Login',
-        component: () => import('../views/Login.vue')
+        component: () => import('../views/Login.vue'),
+        meta: { isPublic: true }
     },
     {
         path: '/home',
@@ -137,4 +138,14 @@ const router = new VueRouter({
     routes
 })
 
+// 增加全局前置路由守卫
+router.beforeEach((to, from, next) => {
+    if (!to.meta.isPublic && !localStorage.token) {
+        return next('/login')
+    }
+    next()
+})
+
 export default router
+
+

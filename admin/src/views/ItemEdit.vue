@@ -23,6 +23,7 @@
         <el-upload
           class="avatar-uploader"
           :action="$http.defaults.baseURL + '/upload'"
+          :headers="headers"
           :show-file-list="false"
           :on-success="afterUpload"
           :before-upload="beforeAvatarUpload"
@@ -44,7 +45,14 @@
       id: {},
     },
     data() {
-      return { model: {}, parents: [], imageUrl: '' };
+      return {
+        model: {},
+        parents: [],
+        imageUrl: '',
+        headers: {
+          Authorization: 'Bearer ' + localStorage.token,
+        },
+      };
     },
     created() {
       this.fetchParents();

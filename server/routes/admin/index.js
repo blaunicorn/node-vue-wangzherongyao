@@ -31,26 +31,33 @@ module.exports = app => {
 
     })
 
+
     // 2 - 20 将2-19添加的错误处理，提取出来，放在各个请求上，顺序： 设定路由是什么，看用户用户是不是存在，，看看对应的model模型是什么，最后挂载在路由。增加了2个中间件，用户登录和自动获取模型。上传也需要
     // 封装成登录检验中间件 ,放在各个路由上
-    const authMiddleware = async (req, res, next) => {
-        const token = String(req.headers.authorization || '').split(' ').pop()
-        assert(token, 401, '请提供jwt token 1')
-        console.log(222, token, app.get('secret'))
-        const { id } = jwt.verify(token, app.get('secret'), (err, data) => {
-            console.log(err, data)
-            if (err) {
-                return { id: null }
-            }
-            return data
-        })
-        console.log('id', id)
-        assert(id, 401, '无效的jwt token 2')
-        req.user = await AdminUser.findById(id)
-        assert(req.user, 401, '请先登陆3')
-        console.log(req.user)
-        await next()
-    }
+    // const authMiddleware = async (req, res, next) => {
+    //     const token = String(req.headers.authorization || '').split(' ').pop()
+    //     assert(token, 401, '请提供jwt token 1')
+    //     console.log(222, token, app.get('secret'))
+    //     const { id } = jwt.verify(token, app.get('secret'), (err, data) => {
+    //         console.log(err, data)
+    //         if (err) {
+    //             return { id: null }
+    //         }
+    //         return data
+    //     })
+    //     console.log('id', id)
+    //     assert(id, 401, '无效的jwt token 2')
+    //     req.user = await AdminUser.findById(id)
+    //     assert(req.user, 401, '请先登陆3')
+    //     console.log(req.user)
+    //     await next()
+    // }
+
+    // 2-21 将中间件抽离放在Middelware文件中,原函数隐藏
+    const authMiddleware = require('../../Middleware/auth') // 此时调用需要用authMiddleware()
+    const resourceMiddleware = require('../../Middleware/resource')
+    console.log('resourceMiddleware', resourceMiddleware.toLocaleString())
+
     // 资源列表
     // 2 - 19 继续增加中间件，校验用户是否登录, 此时在前端头上添加token
 
@@ -136,18 +143,18 @@ module.exports = app => {
     // 把子路由挂载到app上
     //  通用crud时， 修改为通用接口 增加/rest/:resource 去掉固定的/名，rest 是防止通用接口与其他接口产生冲突， resource可以是任意名 heros=》Hero items=》Item categories对应模型Category
     // 2-20 放置auth中间件 并把获取模型封装成中间件
-    const resourceMiddleware = async (req, res, next) => {
-        //  放在前置的中间件内，请求时会先用async处理 url
-        const modelName = require('inflection').classify(req.params.resource) // 通用crud时，转类名转为大写单数
-        const Model = require(`../../models/${modelName}`) // 通用crud时，增加通用模型
-        console.log(modelName, Model)
-        // req.Model是在请求对象上挂载Model属性
-        req.Model = Model
-        next()
-    }
-    app.use('/admin/api/rest/:resource', authMiddleware, resourceMiddleware, router)
-    // app.use('/admin/api/rest/:resource', async (req, res, next) => {
+    // const resourceMiddleware = async (req, res, next) => {
     //     //  放在前置的中间件内，请求时会先用async处理 url
+    //     const modelName = require('inflection').classify(req.params.resource) // 通用crud时，转类名转为大写单数
+    //     const Model = require(`../../models/${modelName}`) // 通用crud时，增加通用模型
+    //     console.log(modelName, Model)
+    //     // req.Model是在请求对象上挂载Model属性
+    //     req.Model = Model
+    //     next()
+    // }
+    app.use('/admin/api/rest/:resource', authMiddleware(), resourceMiddleware(), router)
+    // app.use('/admin/api/rest/:resource', async (req, res, next) => {
+    //  放在前置的中间件内，请求时会先用async处理 url
     //     const modelName = require('inflection').classify(req.params.resource) // 通用crud时，转类名转为大写单数
     //     const Model = require(`../../models/${modelName}`) // 通用crud时，增加通用模型
     //     console.log(modelName, Model)
@@ -163,7 +170,9 @@ module.exports = app => {
     const multer = require('multer') // 引入module 模块
     const upload = multer({ dest: __dirname + '/../../uploads' })  // 定义一个中间件，并执行它,同时传递一个参数dest ，目标地址是哪里(当前文件夹 退两级) ， __dirname为绝对地址
     // 2-20 上传图片需要验证中间件
-    app.post('/admin/api/upload', authMiddleware, upload.single('file'), async (req, res) => { // upload.singel('file) 接收单一文件，文件名为file
+    app.post('/admin/api/upload', authMiddleware(), upload.single('file'), async (req, res) => { // upload.singel('file) 接收单一文件，文件名为file
+        // app.post('/admin/api/upload', upload.single('file'), async (req, res) => { // upload.singel('file) 接收单一文件，文件名为file
+
         const file = req.file // 是通过multer中间件增加的req.file对象
         file.url = `http://localhost:3000/uploads/${file.filename}`
         res.send(file)  // 返回前段需要定义一个静态的文件并把路径返回给前端

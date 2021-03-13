@@ -1493,9 +1493,139 @@ http.interceptors.request.use(config => {
         next()
 
     }, async (req, res) => {})
-  
+```js
       // node.js服务端报错使用http-assert，能够很方便的返回错误
     // 2-19 继续增加 npm install http-assert 这个是node.js下判断条件是否成立。用法： assert（确保条件存在，如果不存在抛出什么状态码，信息是什么)
+```
+### 15.前端还需要对没有axios请求的页面进行登录限制，譬如 /item/create 页面没有请求，后端就限制不到
+```js
+// 增加中间件后，上传图片因为没有token header出错,el-upload 增加headers参数
+        <el-upload
+          class="avatar-uploader"
+          :action="$http.defaults.baseURL + '/upload'"
+          :headers="headers"
+          :show-file-list="false"
+          :on-success="afterUpload"
+          :before-upload="beforeAvatarUpload"
+        >
+        ...
+        data() {
+            return {
+                headers: {
+                  Authorization: 'Bearer ' + localStorage.token,
+                },
+            }
+        }
+```
+```js
+// 图片上传headers错误的另一种处理方法：url 和 header混入。
+Vue.mixin({
+    computed: {
+        uploadUrl() {
+            return this.$http.defaults.baseURL + '/upload'
+        }
+    },
+    methods: {
+        getAuthHeaders() {
+            return {
+                Authorization: `Bearer ${localStorage.token}`
+            }
+        }
+    }
+})
+```
+```js
+// router/index.js增加全局前置路由守卫
+router.beforeEach((to, from, next) => {
+    if (!to.meta.isPublic && !localStorage.token) {
+        return next('/login')
+    }
+    next()
+})
+```
+### 16、Web界面安装sass 和样式重置
+```js
+// sass-loader 最新版会不兼容，所以要安装老版本
+npm install -D sass
+npm install -D sass-loader@7.x
+```
+```js
+// 新建src/style/index.scss，重置并设置样式
+// reset
+
+* {
+    box-sizing: border-box;
+    outline: none; // 取消tab高亮
+}
+html {
+    font-size: 13px;
+}
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.2rem;
+    background-color: #f1f1f1;
+}
+a {
+    color: #999;
+}
+
+```
+```js
+// src/style/index.scss，网站色彩和字体定义,熟悉函数的使用
+
+// colors 定义颜色,注意是内部逗号结尾，外部分号结尾
+$colors: (
+    'primary': #db9e3f,
+    'white': #fff,
+    'black': #000,
+   'dark':#222,
+   'grey':#999,
+   'light':#f9f9f9,
+   'dark-1':#343440
+
+);
+@each $colorKey,$color in $colors {
+    .text-#{$colorKey} {
+        color: $color;
+    }
+    .bg-#{$colorKey} {
+        background-color: $color;
+    }
+}
+// text 文字对齐方式
+@each $var in (left,center,right) {
+    .text-#{$var} {
+        text-align: $var;
+    }
+};
+// font size
+$base-font-size: 1rem;
+$font-sizes: (
+    xs: .769231,  // 10px
+    sm: .923077,  //12px
+    md:1,  //13px
+    lg: 1.076923, //14px
+    xl: 1.230769, //16px
+    );
+@each $sizeKey,$size in $font-sizes {
+    .fs-#{$sizeKey} {
+        font-size: $size * $base-font-size;
+    }
+}
+
+```
+    ### 12、Web界面中的swiper的点击和滑动控制样式功能
+```js
+//点击转跳区域
+@click = "$refs.list.swiper.slideTo(i)"
+//区域改变，active的样式也跟随变化
+@slide-change="() => active = $refs.list.swiper.realIndex"
+```
+### 12、格式化时间用的是dayjs
+
+### 13、 使用jsonwebtoken进行登陆数据传输
+
 ## 一、 入门
 1. 项目介绍
 1. 工具安装和环境搭建(nodejs,npm,mongodb)

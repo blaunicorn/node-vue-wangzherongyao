@@ -114,6 +114,7 @@
                   class="avatar-uploader"
                   :action="$http.defaults.baseURL + '/upload'"
                   :show-file-list="false"
+                  :headers="getAuthHeaders()"
                   :on-success="(res) => $set(item, 'icon', res.url)"
                   :before-upload="beforeAvatarUpload"
                 >
