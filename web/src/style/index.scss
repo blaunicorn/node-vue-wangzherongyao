@@ -56,3 +56,89 @@ $font-sizes: (
         font-size: $size * $base-font-size;
     }
 }
+
+// flex
+.d-flex {
+    display: flex;
+}
+.flex-column {
+    flex-direction: column;
+}
+$flex-jc: (
+    start: flex-start,
+    end: flex-end,
+    center: center,
+    between: space-between,
+    around:space-around,
+);
+@each $key,$value in $flex-jc {
+    .jc-#{$key} {
+        justify-content: $value
+    }
+}
+$flex-ai: (
+    start: flex-start,
+    end: flex-end,
+    center: center,
+    stretch: stretch,
+);
+@each $key,$value in $flex-ai {
+    .ai-#{$key} {
+        align-items: $value
+    }
+}
+// 拓展整个空余空间
+.flex-1 {
+    flex: 1
+}
+//  等同于上一个类，意味着填充整个剩余空间
+.flex-grow-1 {
+    flex-grow:1
+}
+
+// spacing
+// 0-5 : 0
+// .mt-1 margin top level1; .pb-2 padding bottom level2
+// 类型
+$spacing-types: (m: margin,p: padding);
+// 方向
+$spacing-directions: (t: top,r:right,b:bottom,l:left);
+// 定义单位尺寸
+$pacing-base-size: 1rem;
+$spaceing-sizes: (0:0,1:0.25,2:0.5,3:1,4:1.5,5:3);
+// @each $typeKey,$type in $spacing-types {
+//     .#{$typeKey} {
+//         #{$type}: 0
+//     }
+// }
+// 根据上面的结构，去三级嵌套循环,生成带方位和不带方位的
+@each $typeKey,$type in $spacing-types {
+    // .m-1 不带方位的形式
+        @each $sizeKey,$size in $spaceing-sizes {
+            // .m-1 {margin:0.25rem}
+            .#{$typeKey}-#{$sizeKey}{ 
+                #{$type}:$size*$pacing-base-size}
+        }
+    // .mt-1 带方位的形式
+    @each $directionKey,$direction in $spacing-directions {
+        @each $sizeKey,$size in $spaceing-sizes {
+            // .mt-1 {margin-top:0.25rem}
+            .#{$typeKey}#{$directionKey}-#{$sizeKey}{ 
+                #{$type}-#{$direction}:$size*$pacing-base-size
+            }
+        }
+    }
+    // .mx-1 水平左右保持一致 .my-1 垂直上下保持一致
+            @each $sizeKey,$size in $spaceing-sizes {
+            // .mx-1 {margin:0.25rem}
+            .#{$typeKey}x-#{$sizeKey}{ 
+                #{$type}-left:$size*$pacing-base-size;
+                #{$type}-right:$size*$pacing-base-size;
+            }
+            // .my-1 {margin:0.25rem}   
+            .#{$typeKey}y-#{$sizeKey}{ 
+                #{$type}-top:$size*$pacing-base-size;
+                #{$type}-bottom:$size*$pacing-base-size;
+            }
+        }
+}

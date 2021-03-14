@@ -1571,8 +1571,9 @@ a {
 }
 
 ```
+### 17、src/style/index.scss，网站色彩和字体定义,熟悉函数的使用
+
 ```js
-// src/style/index.scss，网站色彩和字体定义,熟悉函数的使用
 
 // colors 定义颜色,注意是内部逗号结尾，外部分号结尾
 $colors: (
@@ -1615,6 +1616,59 @@ $font-sizes: (
 }
 
 ```
+
+### 18、src/style/index.scss，通用flex布局样式定义
+```js
+// flex
+.d-flex {
+    display: flex;
+}
+.flex-column {
+    flex-direction: column;
+}
+$flex-jc: (
+    start: flex-start,
+    end: flex-end,
+    center: center,
+    between: space-between,
+    around:space-around,
+);
+@each $key,$value in $flex-jc {
+    .jc-#{$key} {
+        justify-content: $value
+    }
+}
+$flex-ai: (
+    start: flex-start,
+    end: flex-end,
+    center: center,
+    stretch: stretch,
+);
+@each $key,$value in $flex-ai {
+    .ai-#{$key} {
+        align-items: $value
+    }
+}
+// 拓展整个空余空间
+.flex-1 {
+    flex: 1
+}
+//  等同于上一个类，意味着填充整个剩余空间
+.flex-grow-1 {
+    flex-grow:1
+}
+```
+
+### 19、src/style/index.scss，常用边距margin、padding定义
+```js
+
+```
+
+### 19、src/style/index.scss，常用边距margin、padding定义
+```js
+
+```
+
     ### 12、Web界面中的swiper的点击和滑动控制样式功能
 ```js
 //点击转跳区域
