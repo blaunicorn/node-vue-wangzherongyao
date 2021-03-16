@@ -1,0 +1,49 @@
+// 把变量在抽离出来
+// colors 定义颜色,注意是内部逗号结尾，外部分号结尾
+$colors: (
+    'primary': #db9e3f,
+    'white': #fff,
+    'black': #000,
+   'dark':#222,
+   'grey':#999,
+   'grey-1':#666,
+    'info': #4b67af,
+   'light':#f9f9f9,
+   'dark-1':#343440,
+   'light-1': #d4d9de
+
+);
+$border-color: map-get($map:$colors , $key:'light-1' );
+// font size
+$base-font-size: 1rem;
+$font-sizes: (
+    xxs: .615385, // 8px
+    xs: .769231,  // 10px
+    sm: .923077,  //12px
+    md:1,  //13px
+    lg: 1.076923, //14px
+    xl: 1.230769, //16px
+    );
+
+    $flex-jc: (
+    start: flex-start,
+    end: flex-end,
+    center: center,
+    between: space-between,
+    around:space-around,
+);
+
+$flex-ai: (
+    start: flex-start,
+    end: flex-end,
+    center: center,
+    stretch: stretch,
+);
+
+// 类型
+$spacing-types: (m: margin,p: padding);
+// 方向
+$spacing-directions: (t: top,r:right,b:bottom,l:left);
+// 定义单位尺寸
+$pacing-base-size: 1rem;
+$spaceing-sizes: (0:0,1:0.25,2:0.5,3:1,4:1.5,5:3);

@@ -1661,14 +1661,243 @@ $flex-ai: (
 
 ### 19、src/style/index.scss，常用边距margin、padding定义
 ```js
-
+// spacing
+// 0-5 : 0
+// .mt-1 margin top level1; .pb-2 padding bottom level2
+// 类型
+$spacing-types: (m: margin,p: padding);
+// 方向
+$spacing-directions: (t: top,r:right,b:bottom,l:left);
+// 定义单位尺寸
+$pacing-base-size: 1rem;
+$spaceing-sizes: (0:0,1:0.25,2:0.5,3:1,4:1.5,5:3);
+// @each $typeKey,$type in $spacing-types {
+//     .#{$typeKey} {
+//         #{$type}: 0
+//     }
+// }
+// 根据上面的结构，去三级嵌套循环,生成带方位和不带方位的
+@each $typeKey,$type in $spacing-types {
+    // .m-1 不带方位的形式
+        @each $sizeKey,$size in $spaceing-sizes {
+            // .m-1 {margin:0.25rem}
+            .#{$typeKey}-#{$sizeKey}{ 
+                #{$type}:$size*$pacing-base-size}
+        }
+    // .mt-1 带方位的形式
+    @each $directionKey,$direction in $spacing-directions {
+        @each $sizeKey,$size in $spaceing-sizes {
+            // .mt-1 {margin-top:0.25rem}
+            .#{$typeKey}#{$directionKey}-#{$sizeKey}{ 
+                #{$type}-#{$direction}:$size*$pacing-base-size
+            }
+        }
+    }
+    // .mx-1 水平左右保持一致 .my-1 垂直上下保持一致
+            @each $sizeKey,$size in $spaceing-sizes {
+            // .mx-1 {margin:0.25rem}
+            .#{$typeKey}x-#{$sizeKey}{ 
+                #{$type}-left:$size*$pacing-base-size;
+                #{$type}-right:$size*$pacing-base-size;
+            }
+            // .my-1 {margin:0.25rem}   
+            .#{$typeKey}y-#{$sizeKey}{ 
+                #{$type}-top:$size*$pacing-base-size;
+                #{$type}-bottom:$size*$pacing-base-size;
+            }
+        }
+}
 ```
 
-### 19、src/style/index.scss，常用边距margin、padding定义
+### 20、web页面主页框架和顶部菜单
+
+```js
+vue add router //增加路由
+
+
+```
+### 21、web页面swiper
+```js
+npm install vue-awesome-swiper --save
+// 自动播放 点击选择
+        swiperOptions: {
+          slidesPerView: 1,
+          autoplay: {
+            disableOnInteraction: false,
+            delay: 1000,
+          },
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+```
+### 22、web页面使用精灵图
+```js
+// sprite 
+.sprite {
+    background: url(../assets/images/index.png) no-repeat 0 0;
+    // 一般双倍像素设计
+    background-size: 28.846154rem;
+    // 要设置宽高必须用 inline-block
+    display: inline-block;
+    // spritecow.com网站 可以自动定位雪碧图
+    &.sprite-news {
+    width: 1.769231rem;
+	height: 1.538462rem;
+    background-position: 63.546% 15.517%;
+    }
+    &.sprite-arrow {
+    width: .769231rem;
+	height: .769231rem;
+    background-position: 38.577% 52.076%;
+    }
+    &.sprite-news {
+    width: 1.769231rem;
+	height: 1.538462rem;
+    background-position: 63.546% 15.517%;
+    }
+    &.sprite-practice {
+    width: 1.7692rem;
+    height: 1.5385rem;
+    background-position: 90.483% 15.614%;
+  }
+  &.sprite-affair {
+    background-position: 36.746% 0.924%;
+    width: 1.4615rem;
+    height: 1.6923rem;
+  }
+  &.sprite-mall {
+    background-position: 10.408% 15.517%;
+    width: 1.5385rem;
+    height: 1.5385rem;
+    border: none;
+  }
+  &.sprite-start {
+    background-position: 89.733% 1.266%;
+    width: 1.5385rem;
+    height: 1.6154rem;
+  }
+  &.sprite-honour {
+    background-position: 36.467% 15.287%;
+    width: 1.8462rem;
+    height: 1.5385rem;
+  }
+  &.sprite-community {
+    background-position: 9.728% 1.266%;
+    width: 2rem;
+    height: 1.6154rem;
+  }
+  &.sprite-base {
+    margin-top: -3px;
+    background-position: 63.3% 0.927%;
+    width: 1.8462rem;
+    height: 1.8462rem;
+  }
+  &.sprite-echart {
+    background-position: 0 96.207%;
+    width: 1.8462rem;
+    height: 1.5385rem;
+  }
+  &.sprite-edition {
+    background: url(../assets/images/version-icon.png) no-repeat -1px 0px;
+    background-size: 100% 100%;
+    width: 1.8462rem;
+    height: 1.8462rem;
+  }
+}
+```
+```js
+// 精灵图的收起和展开
+        <div
+          class="bg-light py-2 fs-sm;"
+          style="width: 100%"
+          @click="switchActive"
+        >
+          <i
+            class="sprite sprite-arrow mr-1"
+            :style="{ transform: isCollapse ? 'rotate(180deg)' : '' }"
+          ></i>
+          <span class="retract">{{ isCollapse ? '收起' : '展开' }}</span>
+        </div>
+```
+### 22、web页面字体图标
+https://www.iconfont.cn/ 选择图标，下载代码
 ```js
 
-```
+import './assets/iconfont/iconfont.css'
+<i class="iconfont icon-news text-primary"></i>
 
+### 23、web页面卡片容器并调整为组件字体图标
+  所有的新闻资讯、英雄列表都可以变成一个卡片包装
+```js
+
+import './assets/iconfont/iconfont.css'
+<i class="iconfont icon-news text-primary"></i>
+```
+/components/Card.vue
+```js
+<template>
+  <div class="card mt-3 p-3 bg-white">
+    <div class="card-header d-flex ai-center pb-3">
+      <i class="iconfont" :class="`icon-${icon}`" style="color: deeppink"></i>
+      <div class="fs-xl flex-1 px-2">{{ title }}</div>
+      <i class="iconfont icon-menu"></i>
+    </div>
+    <div class="card-body pt-3">
+      <slot></slot>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    props: {
+      title: {
+        type: String,
+        required: true,
+        default: '',
+      },
+      icon: {
+        type: String,
+        required: true,
+        default: '',
+      },
+    },
+  };
+</script>
+
+<style lang="scss">
+  @import '../style/_variables.scss';
+  .card {
+    border-bottom: 1px solid $border-color;
+    .card-header {
+      border-bottom: 1px solid $border-color;
+    }
+  }
+</style>
+```
+全局引入组件
+```js
+// 全局引用组件
+import Card from './components/Card.vue'
+Vue.component('a-card', Card)
+```
+局部引入组件
+```js
+</template>
+  <div>
+    <m-card icon="caidananniudianji" title="图文攻略"></m-card>
+    <!-- end of 新闻资讯卡片 -->
+  </div>
+</template>
+
+<script>
+  // @ is an alias to /src
+  import Card from '../components/Card';
+  export default {
+    name: 'Home',
+    components: { 'm-card': Card },
+```
     ### 12、Web界面中的swiper的点击和滑动控制样式功能
 ```js
 //点击转跳区域
