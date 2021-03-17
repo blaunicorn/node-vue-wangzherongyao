@@ -197,7 +197,7 @@
       async fetch(id) {
         const res = await this.$http.get(`/rest/hero/${id}`);
         console.log(res);
-        // 通过依次浅拷贝，确保model中有多层属性
+        // 通过y一次浅拷贝，确保model中有多层属性
         this.model = Object.assign({}, this.model, res.data);
         // this.model = res.data;
       },

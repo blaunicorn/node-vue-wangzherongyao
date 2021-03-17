@@ -18,6 +18,10 @@ import './assets/iconfont/iconfont.css'
 import Card from './components/Card.vue'
 Vue.component('a-card', Card)
 
+// 全局引用CardList组件
+import ListCard from './components/ListCard.vue'
+Vue.component('m-list-card', ListCard)
+
 new Vue({
     router,
     render: h => h(App)

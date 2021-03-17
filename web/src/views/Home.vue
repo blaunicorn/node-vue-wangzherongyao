@@ -187,6 +187,18 @@
         </swiper>
       </div>
     </a-card>
+    <m-list-card
+      icon="caidananniudianji"
+      title="新闻资讯测试"
+      :categories="newsCats"
+    >
+      <div class="py-2" v-for="n in 5" :key="n">
+        <span>[新闻]</span>
+        <span>|</span>
+        <span>春和景明柳垂莺娇，峡谷好礼随春报到</span>
+        <span>06/12</span>
+      </div>
+    </m-list-card>
     <m-card icon="caidananniudianji" title="新闻资讯-局部组件"></m-card>
     <m-card icon="caidananniudianji" title="英雄列表"></m-card>
     <m-card icon="caidananniudianji" title="精彩视频"></m-card>
@@ -215,7 +227,18 @@
           },
         },
         isCollapse: true,
-        newsCats: [],
+        newsCats: [
+          {
+            name: '热门',
+            newsList: [
+              {
+                categoryName: '公告',
+                title: '景明柳垂莺娇，峡谷好礼随春报到',
+                date: '06/01',
+              },
+            ],
+          },
+        ],
         herosCats: [],
       };
     },

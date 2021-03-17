@@ -1,30 +1,30 @@
-# 【全栈之巅】Node.js + Vue.js 全栈开发王者荣耀手机端官网和管理后台
-> 本项目是 学习[Bilibili 全栈之巅](https://space.bilibili.com/341919508) 视频教程相关源码
+## 【全栈之巅】Node.js + Vue.js 全栈开发王者荣耀手机端官网和管理后台
+> 本项目是 学习[Bilibili 全栈之巅](https://space.bilibili.com/341919508) 视频教程相关源码和体会
 > https://gitee.com/blaunicorn/node-vue-wangzherongyao
 > 持续更新中... 
 
-# 王者荣耀全栈开发
-部分截图
-![输入图片说明](https://images.gitee.com/uploads/images/2020/0420/182135_13b694a5_4964818.png "NAG1AQN0%5MG@L}R.png")
-![输入图片说明](https://images.gitee.com/uploads/images/2020/0420/182323_789567f4_4964818.png "5I12Y9O{OFE50~CGLO]AYSB_看图王.png")
-![输入图片说明](https://images.gitee.com/uploads/images/2020/0420/182445_259638cf_4964818.png "YILW6Z$UEHQPM(JV](B%RJ.png")
-![输入图片说明](https://images.gitee.com/uploads/images/2020/0420/182453_4089f826_4964818.png "032RSW2(GS3(IO9HLCT2{FK.png")
+### 1.1 王者荣耀全栈开发部分截图
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210316222242490.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk0MTcxMg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210316222242438.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk0MTcxMg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210316222242358.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk0MTcxMg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210316222242314.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk0MTcxMg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210316223036308.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk0MTcxMg==,size_16,color_FFFFFF,t_70#pic_center)
 
-## 部署到服务器上，localhost:3000地址是前台首页不是后台的首页，添加admin才是后台的首页
-### 0、下载安装 node 和MongoDB server 、 vscode
-### 1、admin是后台界面部分、web是前台界面部分、server是前后台的后端接口部分
 
- npm i -g @vue/cli 全局安装vuecli,-g 全局安装
+### 1.2 配置环境，下载安装 node 和MongoDB server 、 vscode
+### 1.3 项目介绍：admin是后台界面部分、web是前台界面部分、server是前后台的后端接口部分。部署到服务器上，localhost:3000地址是前台首页不是后台的首页，添加admin才是后台的首页
+ 
 ```js
-
-vue create web
-
+// 全局安装vuecli,-g 全局安装
+npm i -g @vue/cli  
+// 创建web页项目
+vue create web 
 ```
 
 ```js
-vue create admin
+// 创建管理后端项目
+vue create admin 
 ```
-
 
 ```js
   // 新建server文件夹，并在其下
@@ -32,25 +32,31 @@ vue create admin
   npm i -g nodemon
   npm run serve //启动后台服务器
 ```
-### 2、安装插件
-全局安装nodemon
 
+### 1.4 安装插件
+```js
+// 全局安装nodemon
 npm i -g nodemon
+```
 
-admin端
-
+```js
+// admin端
 vue add element
 vue add router
 npm install axios
+```
 
-server端
-    // 下一个版本  联接mongodb数据库 跨域 
+```js
+// server端安装express@next版本  联接mongodb数据库 跨域 映射 上传文件中间件
 npm i express@next mongoose cors inflection multer
+```
 
-### 3、server端自定义脚本中用nodemon运行代码
+### 1.5 server端自定义脚本中用nodemon运行代码
+```js
 "serve": "nodemon index.js"
+```
 
-### 4、分类创建及编辑页(admin/src/views/CategoryEdit.vue)
+### 2.1 admin端创建分类及编辑页(admin/src/views/CategoryEdit.vue)
 ```js
 <template>
   <div class="about">
@@ -97,14 +103,13 @@ export default {
     }
   },
   created(){
-    this.id && this.fetch()
+    this.id && this.fetch() // 判断是否通过router的props传回了id
   }
 }
 </script>
 ```
 
-
-#### 4.1、admin 端请求接口放在http.js中(admin/src/http.js)
+#### 2.1.1 admin 端请求接口放在http.js中(admin/src/http.js)
 ```js
 import axios from 'axios'
 
@@ -115,13 +120,13 @@ const http = axios.create({
 export default http
 ```
 
-#### 4.2、在Main.js中引用http.js(admin/src/main.js)
+#### 2.1.2 在Main.js中引用http.js(admin/src/main.js)
 ```js
 import http from './http'
 Vue.prototype.$http = http
 ```
 
-#### 4.3、server端新建数据库、建立数据库模型、设置增删改查路由
+### 2.2 server端新建数据库、建立数据库模型、设置增删改查路由
 ```js
 // 后端连接数据库(server/plugins/db.js)
 module.exports = app =>{
@@ -131,6 +136,7 @@ module.exports = app =>{
     })
 }
 ```
+
 ```js
 // 创建表模板(server/models/Category.js)
 const mongoose = require('mongoose')
@@ -139,6 +145,7 @@ const schema = new mongoose.Schema({
 })
 module.exports = mongoose.model('Category',schema)
 ```
+
 ```js
 // 写后端接口(server/route/admin/index.js)
 module.exports = app =>{
@@ -188,7 +195,7 @@ app.listen(3000,()=>{
 })
 ```
 
-#### 4.4 admin端定义vue-router路由
+### 2.3 admin端定义vue-router路由
 ```js
 // admin端路由定义(admin/src/router/index.js)
 const routes = [
@@ -206,9 +213,10 @@ const routes = [
     }
 ]
 ```
-#### 4.5 父类编辑 axios 传参、接收参数
+
+### 2.4 父类编辑 axios 传参、接收参数
 ```js
-    // 查
+    // 后端server查(server\routes\admin\index.js)
     router.get('/categories', async (req, res) => {
         // console.log(req.query)
         const limit = +req.query.limit || 10
@@ -217,6 +225,7 @@ const routes = [
     })
 ```
 ```js
+    // 前端admin查询请求(admin\src\views\CategoriesList.vue)
       async fetch() {
         const params = {
           limit: 10,
@@ -228,17 +237,78 @@ const routes = [
         this.items = res.data;
       },
 ```
-### 5 父类子类增删改查
-#### 5.1、编辑页面添加选择父类按钮
-```js
+### 2.5 父类删除 axios 传参、接收参数
 
+```js
+     // 前端admin删除具体物品请求(admin\src\views\CategoriesList.vue)
+<template>
+  <div class="about">
+    <h1>分类列表</h1>
+    <el-table :data="items">
+      <el-table-column prop="_id" label="ID" width="230"> </el-table-column>
+      <el-table-column prop="parent.name" label="上级分类" width="120">
+      </el-table-column>
+      <el-table-column prop="name" label="分类名称" width="120">
+      </el-table-column>
+      <el-table-column fixed="right" label="操作" width="120">
+        <template slot-scope="scope">
+          <el-button
+            type="text"
+            size="small"
+            @click="$router.push(`/categories/edit/${scope.row._id}`)"
+            >编辑</el-button
+          >
+          <el-button @click="remove(scope.row)" type="text" size="small"
+            >删除</el-button
+          >
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+</template>
+<script>
+    ...
+      async remove(row) {
+        console.log(row);
+        this.$confirm(`此操作将永久删除该分类${row.name}, 是否继续?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(async () => {
+            const res = await this.$http.delete(`/rest/categories/${row._id}`);
+            console.log(res);
+            this.$message({
+              type: 'success',
+              message: '删除成功!',
+            });
+            this.fetch();
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除',
+            });
+          });
+      },
+</script>
+```
+
+### 2.6 父类子类增删改查
+
+#### 2.6.1 编辑页面添加选择父类按钮
+```js
+<template>
+    <div>
+      ...
       <el-form-items label="上级分类">
         <el-select v-model="model.parent">
            //上级分类选择,label是显示的内容，value是实际保存的值
           <el-option v-for="item in parents" :key="item._id" :label="item.name" :value="item._id"></el-option>
         </el-select>
       </el-form-items>
-
+    </div>
+</template>
 <script>
 export default {
   data(){
@@ -258,16 +328,18 @@ export default {
 }
 </script>
 ```
-#### 5.2、列表页显示父级分类
+
+#### 2.6.2 列表页显示父级分类
 ```js
       <el-table-column prop="parent.name" label="上级分类"></el-table-column>
 ```
-#### 5.3、server端模型中添加parent字段
+
+#### 2.6.3 server端模型中添加parent字段
 ```js
     //数据库里面的ID叫Objectid，ref表示关联的模型
     parent:{type:mongoose.SchemaTypes.ObjectId,ref:'Category'}
 ```
-#### 54、修改后端接口
+#### 2.6.4 修改后端接口
 ```js
     // populate关联取出
     router.get('/categories',async(req,res)=>{
@@ -275,18 +347,16 @@ export default {
         res.send(items)
      })
 ```
-### 6.通用CRUD,如果使用，需要 保证通用性稳定性和拓展性
-
-#### 6.1、添加mergeParams
+### 2.7 后端通用CRUD,如果使用，需要保证通用性稳定性和拓展性
+#### 2.7.1 添加mergeParams(server\routes\admin\index.js)
 ```js
     //合并URL参数，将父级的参数合并到router里面
-
     const router = express.Router({   
         mergeParams: true
     })
 ```
 
-#### 6.2、动态获取接口地址并在请求对象上挂载Model属性
+#### 2.7.2 动态获取接口地址并在请求对象上挂载Model属性(server\routes\admin\index.js)
 ```js
     //  动态获取接口地址:resource,中间件处理请求模板
     app.use('/admin/api/rest/:resource',async(req,res,next)=>{
@@ -296,7 +366,7 @@ export default {
         next()
     },router)
 ```
-#### 6.3、后端接口代码如下
+#### 2.7.3 后端完整接口代码如下(server\routes\admin\index.js)
 ```js
 module.exports = app =>{
     const express = require('express')
@@ -344,23 +414,26 @@ module.exports = app =>{
         next()
     },router)
 ```
+
 ps 通用接口的类名转换成数据库一致的方法使用是inflection,把小写的复数名称改成大写开头的单数类名（也可以用lodash去尝试）
-#### 6.3、修改前端请求接口
+
+#### 2.7.3 修改前端admin请求接口
 ```js
-//请求接口前面加上/rest
+//请求接口前面加上/rest(admin\src\views\CategoriesEdit.vue)
 //编辑/新建页
 this.$http.put(`/rest/categories/${this.id}`,this.model)
 this.$http.post('/rest/categories',this.model)
 const res = await this.$http.get(`/rest/categories/${this.id}`)
 const res = await this.$http.get(`/rest/categories`)
 
-//列表页
+//列表页(admin\src\views\CategoriesList.vue)
 const res = await this.$http.get('/rest/categories')
 await this.$http.delete(`/rest/categories/${row._id}`)
 ```
 当通用接口做完后，其他的items和heros的接口也就比较简单了。
-### 7、物品管理
-#### 7.1、Main.vue中左侧side添加物品列表
+
+### 2.8 物品管理
+#### 2.8.1 Main.vue中左侧side添加物品列表(admin\src\views\Main.vue)
 ```js
         <el-menu-item-group>
           <template slot="title">物品</template>
@@ -368,10 +441,10 @@ await this.$http.delete(`/rest/categories/${row._id}`)
           <el-menu-item index="/items/list">物品列表</el-menu-item>
         </el-menu-item-group>
 ```
-#### 7.2、复制Category编辑页和列表页为ItemEdit.vue和ItemList.vue并修改页面代码
-```js
-ItemEdit.vue
 
+#### 2.8.2 复制Category编辑页和列表页为ItemEdit.vue和ItemList.vue并修改页面代码
+```js
+// admin\src\views\ItemEdit.vue
 <template>
   <div class="about">
     <h1>{{id ? "编辑":"新建"}}物品</h1>
@@ -428,9 +501,11 @@ export default {
   }
 }
 </script>
+
 ```
-ItemList.vue
+
 ```js
+// admin\src\views\ItemList.vue
 <template>
   <div class="about">
     <h1>物品列表</h1>
@@ -485,18 +560,20 @@ export default {
 </script>
 ```
 
-#### 7.3、添加路由
+#### 2.8.3 admin端添加路由
 ```js
+// admin\src\router\index.js
 import ItemEdit from '../views/ItemEdit.vue'
 import ItemList from '../views/ItemList.vue'
 
       {path:'/items/create',component:ItemEdit},
       {path:'/items/List',component:ItemList},
-      {path:'/items/create/:id',component:ItemEdit,props:true}
+      {path:'/items/create/:id',component:ItemEdit,props:true} // props: true 允许参数注入
 ```
 
-#### 7.4、添加模型Item.js
+#### 2.8.4 server端添加模型Item.js
 ```js
+// server\models\Item.js
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
@@ -506,34 +583,35 @@ const schema = new mongoose.Schema({
 
 module.exports = mongoose.model('Item',schema)
 ```
-### 8. 图片上传
+### 2.9 图片上传
 sever目录的uploads文件夹，用来存放图片资源，建议重新编辑所有的图标/图片，保存在你自己本地的数据库里
 处理文件需要安装专门用来上传文件的中间件multer ,在server的anmin文件夹中的index.js配置。
-#### 8.1、添加上传文件图标(ItemEdit.vue)
+#### 2.9.1 admin端添加上传文件图标(admin\src\views\ItemEdit.vue)
 ```js
+    // template
       <el-form-item label="分类名称" >
         <el-input v-model="model.name"></el-input>
       </el-form-item>
       <el-form-item label="图标" >
-        //:action:表单提交地址,on-success:成功之后做什么,before-upload:上传之后做什么
+        <!-- :action:表单提交地址,on-success:成功之后做什么,before-upload:上传之后做什么 --!>
         <el-upload
           class="avatar-uploader"
           :action="$http.defaults.baseURL + '/upload'"
           :show-file-list="false"
           :on-success="afterUpload"
         >
-          //有图片显示图片，没有则显示上传图标,:src显示的图片
+          <!-- 有图片显示图片，没有则显示上传图标,:src显示的图片 -->
           <img v-if="model.icon" :src="model.icon" class="avatar">
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
       
 	//js
-    afterUpload(res){
-      console.log(res)
-      //vue提供的方法(赋值主体，赋值的属性，res.url),效果类似this.model.icon = res.url
-      this.$set(this.model,'icon',res.url)
-    }
+        afterUpload(res){
+        console.log(res)
+        //vue提供的方法(赋值主体，赋值的属性，res.url),效果类似this.model.icon = res.url
+        this.$set(this.model,'icon',res.url)
+        }
     
     
 <style>
@@ -562,12 +640,14 @@ sever目录的uploads文件夹，用来存放图片资源，建议重新编辑�
   }
 </style>
 ```
-#### 8.2、添加upload文件上传文件夹（server/upload）
-#### 8.3、在server端安装multer中间件处理文件上传
+
+#### 2.9.2 server端添加upload文件上传文件夹（server/upload）
+
+#### 2.9.3 在server端安装multer中间件处理文件上传
 ```js
 npm i multer
 ```
-#### 8.4、写后端接口(server/route/admin/index.js)
+#### 2.9.4、写后端接口(server/route/admin/index.js)
 ```js
     //使用，multer中间件专门处理数据上传
     const multer = require('multer')
@@ -587,7 +667,8 @@ npm i multer
       this.$set(this.model,'icon',res.url)
     }
 ```
-#### 8.5、为了可以访问图片，创建静态文件托管(server/index.js)
+
+#### 2.9.5、为了可以访问图片，创建静态文件托管(server/index.js)
 上传的文件使用静态文件托管，存放在uploads文件夹，需要在server的主目录下的index.js定义静态路由（绝对路径）
 一般前端的图片等样式文件也要使用静态路由，保证路径的正确（开放出这个路径）
 ```js
@@ -596,9 +677,10 @@ npm i multer
 app.use('/uploads',express.static(__dirname + '/uploads'))
 ```
 Nodejs中想要访问的东西都要写接口
-### 9.英雄管理，比较复杂的英雄编辑页面
 
-#### 9.1、Main.vue中创建英雄列表组
+### 2.10 英雄管理，比较复杂的英雄编辑页面
+
+#### 2.10.1 admin端Main.vue中创建英雄列表组(admin\src\views\Main.vue)
 ```js
         <el-menu-item-group>
           <template slot="title">英雄</template>
@@ -606,9 +688,9 @@ Nodejs中想要访问的东西都要写接口
           <el-menu-item index="/heroes/list">英雄列表</el-menu-item>
         </el-menu-item-group>
 ```
-#### 9.2、新建HeroList.vue和HeroEdit.vue，并在route中增加路由
+#### 2.10.2 新建HeroList.vue和HeroEdit.vue，并在route中增加路由
 ```js
-HeroEdit.vue
+// admin\src\views\HeroEdit.vue
 
 <template>
   <div class="about">
@@ -712,8 +794,9 @@ export default {
   }
 </style>
 ```
-HeroList.vue
+
 ```js
+// admin\src\views\HeroList.vue
 <template>
   <div class="about">
     <h1>英雄列表</h1>
@@ -772,8 +855,10 @@ export default {
 }
 </script>
 ```
-#### 9.3、路由中引用HeroList.vue和HeroEdit.vue
+
+#### 2.10.3 路由中引用HeroList.vue和HeroEdit.vue
 ```js
+// admin\src\router\index.js
 import HeroEdit from '../views/HeroEdit.vue'
 import HeroList from '../views/HeroList.vue'
 
@@ -781,8 +866,9 @@ import HeroList from '../views/HeroList.vue'
       {path:'/heroes/List',component:HeroList},
       {path:'/heroes/create/:id',component:HeroEdit,props:true}
 ```
-#### 9.4、添加英雄模型Hero.js
+#### 2.10.4、添加英雄模型Hero.js
 ```js
+// server\models\Hero.js
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
@@ -823,7 +909,8 @@ const schema = new mongoose.Schema({
 
 module.exports = mongoose.model('Hero',schema)
 ```
-#### 9.5、实现复杂的英雄编辑录入页（HeroEdit.vue） (关联,多选,el-select, multiple)
+
+#### 2.10.5 实现复杂的英雄编辑录入页（HeroEdit.vue） (关联,多选,el-select, multiple)
 ```js
 <template>
   <div class="about">
@@ -999,8 +1086,10 @@ export default {
   }
 </style>
 ```
-#### 9.6、技能编辑=》将英雄编辑页内容用tab包裹区分为basic 和skills 两个tab页
+
+### 2.12 英雄的技能编辑=》将英雄编辑页内容用tab包裹区分为basic 和skills 两个tab页
 ```js
+// admin\src\views\HeroEdit.vue
 <el-tab-pane label="技能" name="skills">
           <!-- type默认为按钮，type="text"为文字链接样式 -->
           <!-- 数据中skills必须是数组 -->
@@ -1040,19 +1129,113 @@ export default {
         </el-tab-pane>
 
       </el-tabs>
+      ...
+<script>
+  export default {
+    props: {
+      id: {},
+    },
+    data() {
+      return {
+        categories: [],
+        items: [],
+        model: {
+          skills: [],
+          scores: {
+            difficult: 0,
+          },
+        },
+        parents: [],
+        imageUrl: '',
+      };
+    },
+    created() {
+      this.fetchParents();
+      this.fetchCategories();
+      this.fetchItems();
+      this.id && this.fetch(this.id);
+    },
+    methods: {
+      afterUpload(res, file) {
+        console.log(res, file);
+        this.$set(this.model, 'avatar', res.url);
+        // this.model.icon = res.url; // 可能会无法响应赋值,也可以先在data上定义好，就 不用set赋值了。
+        // this.imageUrl = URL.createObjectURL(res.raw);
+      },
+      beforeAvatarUpload(file) {
+        const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是 JPG 格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
+      },
+      async fetch(id) {
+        const res = await this.$http.get(`/rest/hero/${id}`);
+        console.log(res);
+        // 通过y一次浅拷贝，确保model中有多层属性
+        this.model = Object.assign({}, this.model, res.data);
+        // this.model = res.data;
+      },
+      async fetchParents() {
+        const res = await this.$http.get(`/rest/hero/`);
+        console.log(res);
+        this.parents = res.data;
+      },
+      async fetchCategories() {
+        const res = await this.$http.get(`/rest/categories/`);
+        console.log(res);
+        this.categories = res.data;
+      },
+      async fetchItems() {
+        const res = await this.$http.get(`/rest/item/`);
+        // console.log(res);
+        this.items = res.data;
+      },
+      async save() {
+        if (this.id) {
+          const res = await this.$http.put(`/rest/hero/${this.id}`, this.model);
+          console.log(res);
+          this.$message({
+            type: 'success',
+            message: '编辑成功',
+          });
+          this.$router.push('/hero/list');
+          return;
+        }
+        // async await 与  this.$http.post().then 相似
+        const res = await this.$http.post('/rest/hero/', this.model);
+        console.log(res);
+        this.$message({
+          type: 'success',
+          message: '创建成功',
+        });
+        this.$router.push('/hero/list');
+      },
+    },
+  };
+</script> 
 ```
-### 10、文章管理，同一篇文章可能属于多个分类，这个要注意
-#### 10.1、Main.vue中添加侧边栏
+
+### 2.13 文章管理，同一篇文章可能属于多个分类，这个要注意
+#### 2.13.1 admin端Main.vue中添加侧边栏
 ```js
+// admin\src\views\Main.vue
         <el-menu-item-group>
           <template slot="title">文章</template>
           <el-menu-item index="/articles/create">新建文章</el-menu-item>
           <el-menu-item index="/articles/list">文章列表</el-menu-item>
         </el-menu-item-group>
 ```
-#### 10.2、添加ArticleEdit.vue和ArticleList.vue
-#### 10.3、router.js中添加路由
+#### 2.13.2 admin端复制添加ArticleEdit.vue和ArticleList.vue
+
+#### 2.13.3 admin端router.js中添加路由
 ```js
+// admin\src\router\index.js
 import ArticleEdit from '../views/ArticleEdit.vue'
 import ArticleList from '../views/ArticleList.vue'
 
@@ -1060,8 +1243,10 @@ import ArticleList from '../views/ArticleList.vue'
       {path:'/articles/List',component:ArticleList},
       {path:'/articles/create/:id',component:ArticleEdit,props:true}
 ```
-#### 10.4、修改ArticleEdit.vue
+
+#### 2.13.4 修改ArticleEdit.vue
 ```js
+// admin\src\views\ArticleEdit.vue
 <template>
   <div class="about">
     <h1>{{id ? "编辑":"新建"}}分类</h1>
@@ -1127,8 +1312,10 @@ export default {
 }
 </script>
 ```
-#### 10.5、添加Article.js模型
+
+#### 2.13.5 server端添加Article.js模型
 ```js
+// server\models\Article.js
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
@@ -1140,8 +1327,9 @@ const schema = new mongoose.Schema({
 module.exports = mongoose.model('Article',schema)
 ```
 
-#### 10.6、修改ArticleList.vue
+#### 10.6、admin端修改ArticleList.vue
 ```js
+// admin\src\views\ArticleList.vue
 <template>
   <div class="about">
     <h1>文章列表</h1>
@@ -1196,12 +1384,14 @@ export default {
 }
 </script>
 ```
-### 11.富文本编辑器使用github上的 vue2-editor 可直接npm下载 或 vue-quill-editor
-ps:优化富文本内 图片上传 vue2-editor 自定义上传图片函数已经改为 @image-added
+
+### 2.14 富文本编辑器使用github上的 vue2-editor 可直接npm下载 或 vue-quill-editor
 ```js
-// admin 目录下
+// admin 目录下安装
 npm install --save vue2-editor
 ```
+ps:优化富文本内 图片上传 vue2-editor 自定义上传图片函数已经改为 @image-added
+```js
 <template>
     <vue-editor
         id="editor"
@@ -1212,7 +1402,7 @@ npm install --save vue2-editor
 </template>
 <script>
   import { VueEditor } from 'vue2-editor'; // 解构写法
-  //   import a from 'vue2-editor';  // 另一种写法，对象写法 ，用 a.VueEditor 获取
+  //   import aaa from 'vue2-editor';  // 另一种写法，对象写法 ，用 aaa.VueEditor 获取
   export default {
     components: {
       VueEditor,
@@ -1230,15 +1420,20 @@ npm install --save vue2-editor
     }
   }
 </script>
- 
-### 12.广告位轮播图
-main.vue
+```
+
+### 2.15 广告位轮播图
+```js
+// admin\src\views\Main.vue
           <el-menu-item-group>
             <template slot="title">广告位</template>
             <el-menu-item index="/ad/create">新建广告位</el-menu-item>
             <el-menu-item index="/ad/list">广告位列表</el-menu-item>
           </el-menu-item-group>
-router/index.js
+```
+
+```js
+// admin\src\router\index.js
             {
                 path: '/ad/create',
                 name: 'AdCreate',
@@ -1255,8 +1450,12 @@ router/index.js
                 name: 'AdList',
                 component: () => import('../views/AdList.vue')
             }
-新建 AdEdit.vue AdList.vue
-新建Ad.js
+```
+
+admin端src/views新建 AdEdit.vue AdList.vue
+
+server端model下新建Ad.js
+```js
 const mongoose = require('mongoose')
 
 // 定义模型字段 一个广告位内要有多个广告
@@ -1272,8 +1471,11 @@ const schema = new mongoose.Schema({
 
 // 导出Item模型，哪里需要用，哪里引入，引入到 routes/admin/index.js
 module.exports = mongoose.model('Ad', schema)
-### 13.管理员账号设置
-服务端设置模型  server/models/AdminUser.js
+```
+
+### 2.16 管理员账号设置
+```js
+// 服务端设置模型  server/models/AdminUser.js
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
@@ -1282,14 +1484,19 @@ const schema = new mongoose.Schema({
 })
 
 module.exports = mongoose.model('AdminUser', schema)
+```
 
 管理端main.vue页面设置联接
-
 router/index.js设置路由
-服务端 密码加盐 
+服务端安装插件，并建立模型，密码加盐 
+```js
 npm i bcrypt  // 因gyp错误未安装成功，改成
 npm install bcryptjs
-let bcrypt= require('bcryptjs')
+```
+
+```js
+// server\models\AdminUser.js
+// let bcrypt= require('bcryptjs')  可以定义变量引用，也可以直接引用
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
@@ -1306,8 +1513,11 @@ const schema = new mongoose.Schema({
 })
 
 module.exports = mongoose.model('AdminUser', schema)
+```
 
-### 14.后台登录页面
+### 2.17 后台登录页面
+```js
+// admin\src\views\Login.vue
 <template>
   <div class="login-container">
     <video
@@ -1396,8 +1606,11 @@ module.exports = mongoose.model('AdminUser', schema)
     text-align: center;
   }
 </style>
-server/routes/admin/index.js
-    // 新建登录接口
+```
+
+```js
+// server/routes/admin/index.js
+    // server端新建登录接口
     app.post('/admin/api/login', async (req, res) => {
         // 结构赋值
         const { username, password } = req.body
@@ -1413,7 +1626,9 @@ server/routes/admin/index.js
         // 3.返回token，如果是错误，则在http.js中拦截器统一处理
         res.send({ code: 20000, message: 'ok' })
     })
+```
 
+```js
     admin/http.js
 // 统一处理http错误
 http.interceptors.response.use(res => {
@@ -1431,6 +1646,10 @@ http.interceptors.response.use(res => {
 
     return Promise.reject(err)
 })
+```
+
+```js
+//  server/routes/admin/index.js
 // 优化登录接口，增加密码校验和生成token
     // 登录接口
     app.post('/admin/api/login', async (req, res) => {
@@ -1459,7 +1678,10 @@ http.interceptors.response.use(res => {
         const token = jwt.sign({ id: user.id }, app.get('secret'))
         res.send({ code: 20000, message: 'ok', data: { token } })
     })
-    // 2 - 19 继续增加中间件，校验用户是否登录, 此时在前端头上添加token
+```
+
+### 2.19 继续增加中间件，校验用户是否登录, 此时在前端admin头上添加token
+```js
     //前端 http.js
     // 2-19 请求拦截器，增加token header
 http.interceptors.request.use(config => {
@@ -1469,7 +1691,10 @@ http.interceptors.request.use(config => {
 }, error => {
     return Promise.reject(error)
 })
-        // 后端
+```
+
+```js
+        // 后端server/routes/admin/index.js
         // 单独引入 AdminUser模型，供后期调用
     const AdminUser = require('../../models/AdminUser')
     //引用校验token
@@ -1493,11 +1718,24 @@ http.interceptors.request.use(config => {
         next()
 
     }, async (req, res) => {})
+```
+
 ```js
-      // node.js服务端报错使用http-assert，能够很方便的返回错误
+    // node.js服务端报错使用http-assert，能够很方便的返回错误
     // 2-19 继续增加 npm install http-assert 这个是node.js下判断条件是否成立。用法： assert（确保条件存在，如果不存在抛出什么状态码，信息是什么)
 ```
-### 15.前端还需要对没有axios请求的页面进行登录限制，譬如 /item/create 页面没有请求，后端就限制不到
+
+### 2.20 admin前端还需要对没有axios请求的页面进行登录限制，譬如 /item/create 页面没有请求，后端就限制不到
+```js
+// router/index.js增加全局前置路由守卫
+router.beforeEach((to, from, next) => {
+    if (!to.meta.isPublic && !localStorage.token) {
+        return next('/login')
+    }
+    next()
+})
+```
+
 ```js
 // 增加中间件后，上传图片因为没有token header出错,el-upload 增加headers参数
         <el-upload
@@ -1517,6 +1755,7 @@ http.interceptors.request.use(config => {
             }
         }
 ```
+
 ```js
 // 图片上传headers错误的另一种处理方法：url 和 header混入。
 Vue.mixin({
@@ -1534,16 +1773,8 @@ Vue.mixin({
     }
 })
 ```
-```js
-// router/index.js增加全局前置路由守卫
-router.beforeEach((to, from, next) => {
-    if (!to.meta.isPublic && !localStorage.token) {
-        return next('/login')
-    }
-    next()
-})
-```
-### 16、Web界面安装sass 和样式重置
+
+### 3.1-3.2 Web界面安装sass 和样式重置
 ```js
 // sass-loader 最新版会不兼容，所以要安装老版本
 npm install -D sass
@@ -1554,7 +1785,7 @@ npm install -D sass-loader@7.x
 // reset
 
 * {
-    box-sizing: border-box;
+    box-sizing: border-box; //  统一margin、padding样式
     outline: none; // 取消tab高亮
 }
 html {
@@ -1571,7 +1802,7 @@ a {
 }
 
 ```
-### 17、src/style/index.scss，网站色彩和字体定义,熟悉函数的使用
+### 3.3 web端src/style/index.scss，网站色彩和字体定义,熟悉函数的使用
 
 ```js
 
@@ -1617,7 +1848,7 @@ $font-sizes: (
 
 ```
 
-### 18、src/style/index.scss，通用flex布局样式定义
+### 3.4 web端src/style/index.scss，通用flex布局样式定义
 ```js
 // flex
 .d-flex {
@@ -1659,7 +1890,7 @@ $flex-ai: (
 }
 ```
 
-### 19、src/style/index.scss，常用边距margin、padding定义
+### 3.5 web端src/style/index.scss，常用边距margin、padding定义
 ```js
 // spacing
 // 0-5 : 0
@@ -1709,16 +1940,84 @@ $spaceing-sizes: (0:0,1:0.25,2:0.5,3:1,4:1.5,5:3);
 }
 ```
 
-### 20、web页面主页框架和顶部菜单
+### 3.6 web页面主页框架和顶部菜单
 
 ```js
 vue add router //增加路由
-
-
 ```
-### 21、web页面swiper
+```js
+// web\src\views\Main.vue
+<template>
+  <div>
+    <div class="topbar bg-black py-2 text-white px-3 d-flex ai-center">
+      <img src="../assets/logo.png" height="30" alt="" sizes="" srcset="" />
+      <!-- 用flex-1去占据全部的剩余空间 -->
+      <div class="px-2 flex-1">
+        <div class="text-white">王者荣耀</div>
+        <div class="text-dark-1">团队成就更多</div>
+      </div>
+      <button type="button" class="btn bg-primary jc-end">立即下载</button>
+    </div>
+    <div class="bg-primary pt-3 pb-2">
+      <!-- 增加反色nav-inverse,去掉d-flex text-white -->
+      <div class="nav nav-inverse jc-around pb-1">
+        <div class="nav-item active">
+          <router-link class="nav-link" to="/" tag="div">首页</router-link>
+        </div>
+        <div class="nav-item">
+          <router-link class="nav-link" to="/about" tag="div"
+            >攻略中心</router-link
+          >
+        </div>
+        <div class="nav-item">
+          <router-link class="nav-link" to="/" tag="div">赛事中心</router-link>
+        </div>
+      </div>
+    </div>
+    <!-- 所有子路由入口 -->
+    <router-view></router-view>
+  </div>
+</template>
+
+<script>
+  export default {};
+</script>
+
+<style>
+</style>
+```
+
+### 3.7 web页面swiper
 ```js
 npm install vue-awesome-swiper --save
+// web\src\views\Home.vue
+// template
+    <swiper ref="mySwiper" :options="swiperOptions">
+      <swiper-slide>
+        <img
+          class="w-100"
+          src="../assets/images/201.jpeg"
+          alt=""
+          sizes=""
+          srcset=""
+        />
+      </swiper-slide>
+      <swiper-slide>
+        <img
+          class="w-100"
+          src="../assets/images/202.jpeg"
+          alt=""
+          sizes=""
+          srcset=""
+        />
+      </swiper-slide>
+      <div
+        class="swiper-pagination pagination-home text-right px-3 pb-2"
+        slot="pagination"
+      ></div>
+    </swiper>
+    ...
+// js
 // 自动播放 点击选择
         swiperOptions: {
           slidesPerView: 1,
@@ -1731,9 +2030,10 @@ npm install vue-awesome-swiper --save
             clickable: true,
           },
 ```
-### 22、web页面使用精灵图
+### 3.8 web页面使用精灵图
 ```js
 // sprite 
+// web\src\style\index.scss
 .sprite {
     background: url(../assets/images/index.png) no-repeat 0 0;
     // 一般双倍像素设计
@@ -1820,22 +2120,26 @@ npm install vue-awesome-swiper --save
           <span class="retract">{{ isCollapse ? '收起' : '展开' }}</span>
         </div>
 ```
-### 22、web页面字体图标
-https://www.iconfont.cn/ 选择图标，下载代码
+
+### 3.9 web页面字体图标
+https://www.iconfont.cn/ 选择图标，下载代码压缩包，解压之
 ```js
-
-import './assets/iconfont/iconfont.css'
-<i class="iconfont icon-news text-primary"></i>
-
-### 23、web页面卡片容器并调整为组件字体图标
-  所有的新闻资讯、英雄列表都可以变成一个卡片包装
-```js
-
 import './assets/iconfont/iconfont.css'
 <i class="iconfont icon-news text-primary"></i>
 ```
-/components/Card.vue
+
+### 3.10 web页面卡片容器并调整为组件字体图标
+  所有的新闻资讯、英雄列表都可以变成一个卡片包装
 ```js
+// web\src\main.js 全局引入，也可局部引入
+
+import './assets/iconfont/iconfont.css'
+
+<i class="iconfont icon-news text-primary"></i>
+```
+
+```js
+// components/Card.vue
 <template>
   <div class="card mt-3 p-3 bg-white">
     <div class="card-header d-flex ai-center pb-3">
@@ -1844,6 +2148,7 @@ import './assets/iconfont/iconfont.css'
       <i class="iconfont icon-menu"></i>
     </div>
     <div class="card-body pt-3">
+      <!-- 使用插槽功能 -->
       <slot></slot>
     </div>
   </div>
@@ -1851,6 +2156,7 @@ import './assets/iconfont/iconfont.css'
 
 <script>
   export default {
+    // 父子组件传值
     props: {
       title: {
         type: String,
@@ -1876,18 +2182,22 @@ import './assets/iconfont/iconfont.css'
   }
 </style>
 ```
-全局引入组件
+
+card组件的引入，有两种方式，全局引入、局部引入
 ```js
-// 全局引用组件
+// 如果全局引用组件
+// web\src\main.js
 import Card from './components/Card.vue'
 Vue.component('a-card', Card)
 ```
-局部引入组件
+
 ```js
+// 如果局部引入组件
+// web\src\views\Home.vue
 </template>
   <div>
+    <a-card icon="caidananniudianji" title="新闻资讯-全局组件"></a-card>
     <m-card icon="caidananniudianji" title="图文攻略"></m-card>
-    <!-- end of 新闻资讯卡片 -->
   </div>
 </template>
 
@@ -1897,14 +2207,24 @@ Vue.component('a-card', Card)
   export default {
     name: 'Home',
     components: { 'm-card': Card },
+    ...
 ```
-    ### 12、Web界面中的swiper的点击和滑动控制样式功能
+
+
+### 3.11 web页继续优化card，抽象首页card的各个部分，形成listcard、nav、swiper组件
+```js
+// web\src\components\ListCard.vue 理想是传入数据，直接展示新闻、英雄列表和图文攻略
+
+```
+  
+### 3.12 Web界面中的swiper的点击和滑动控制样式功能
 ```js
 //点击转跳区域
 @click = "$refs.list.swiper.slideTo(i)"
 //区域改变，active的样式也跟随变化
 @slide-change="() => active = $refs.list.swiper.realIndex"
 ```
+
 ### 12、格式化时间用的是dayjs
 
 ### 13、 使用jsonwebtoken进行登陆数据传输

@@ -14,6 +14,7 @@
 
 <script>
   export default {
+    // 父子组件传值
     props: {
       title: {
         type: String,
