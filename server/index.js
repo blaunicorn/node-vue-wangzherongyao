@@ -22,6 +22,8 @@ app.set('secret', app.secret_test)
 
 // 导入admin 路由,引入的函数要加（）执行，并引入app
 require('./routes/admin')(app)
+// 导入web 路由
+require('./routes/web')(app)
 
 app.get('/', async (request, response) => {
     response.send('服务器启动')

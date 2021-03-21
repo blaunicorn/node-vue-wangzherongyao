@@ -30,7 +30,7 @@
   };
 </script>
 
-<style lang="scss">
+<style lang="scss" scope>
   @import '../style/_variables.scss';
   .card {
     border-bottom: 1px solid $border-color;

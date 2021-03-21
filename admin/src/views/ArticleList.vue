@@ -4,8 +4,10 @@
     <el-table :data="items">
       <el-table-column prop="_id" label="ID" width="230"> </el-table-column>
       <el-table-column prop="categories" label="所属分类" width="120">
-        <template slot-scope="scope">
-          <p>{{ scope.row.categories }}</p>
+        <template slot-scope="scope" v-if="parents.length > 0">
+          <p v-for="item in scope.row.categories" :key="item">
+            {{ parents.find((e) => e._id === item).name }},
+          </p>
         </template>
       </el-table-column>
       <el-table-column prop="title" label="文章标题" width="120">
@@ -36,15 +38,22 @@
     data() {
       return {
         items: [],
+        parents: [],
       };
     },
     created() {
+      this.fetchCategories();
       this.fetch();
     },
     methods: {
+      async fetchCategories() {
+        const res = await this.$http.get(`/rest/category/`);
+        console.log(res);
+        this.parents = res.data;
+      },
       async fetch() {
         const params = {
-          limit: 10,
+          limit: 100,
         };
         // 查询字符串传参 用 req.query接收   eg. http://localhost:9999/axios?id=1000  服务端 app.get('/axios', (req, res)
         // restful风格URL  传参 用req.params.id 接收 eg.http://localhost:9999/axios/1000  服务端需要:id

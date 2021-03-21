@@ -56,7 +56,7 @@ module.exports = app => {
     // 2-21 将中间件抽离放在Middelware文件中,原函数隐藏
     const authMiddleware = require('../../Middleware/auth') // 此时调用需要用authMiddleware()
     const resourceMiddleware = require('../../Middleware/resource')
-    console.log('resourceMiddleware', resourceMiddleware.toLocaleString())
+    // console.log('resourceMiddleware', resourceMiddleware.toLocaleString())
 
     // 资源列表
     // 2 - 19 继续增加中间件，校验用户是否登录, 此时在前端头上添加token
@@ -108,9 +108,10 @@ module.exports = app => {
         if (req.Model.modelName === 'Category') {
             queryOptions.populate = 'parent'
         }
-        const model = await req.Model.find().setOptions({
+        // const model = await req.Model.find().populate('parent').limit(limit)
+        const model = await req.Model.find().setOptions(
             queryOptions
-        }).limit(limit)
+        ).limit(limit)
         // const model = await req.Model.find().populate('parent').limit(limit) // 同时取出关联字段，关联字段就可以变成个对象
         // const model = await req.Model.find().populate('parent').limit(limit) // 同时取出关联字段，关联字段就可以变成个对象
         // const model = await Category.find().populate('parent').limit(limit) // 同时取出关联字段，关联字段就可以变成个对象

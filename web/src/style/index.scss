@@ -25,6 +25,13 @@ a {
     height: 100%;
 }
 
+// text overflow
+.text-ellipsis {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 // colors 定义颜色,注意是内部逗号结尾，外部分号结尾
 // $colors: (
 //     'primary': #db9e3f,

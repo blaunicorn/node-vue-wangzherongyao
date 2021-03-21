@@ -17,4 +17,7 @@ module.exports = app => {
         useFindAndModify: true,
         useCreateIndex: true,
     })
+    // （）当成一个函数使用，再传入一个路径,回退到上级路径
+    require('require-all')(__dirname + '/../models')
+
 }

@@ -118,7 +118,7 @@
     <!-- end of 字体图标 -->
     <!-- begin of 新闻资讯卡片 -->
     <div class="card mt-3 p-3 bg-white">
-      <div class="card-header d-flex ai-center">
+      <div class="card-header d-flex ai-center pb-3">
         <i class="iconfont icon-caidananniudianji" style="color: deeppink"></i>
         <div class="fs-xl flex-1 px-2">新闻资讯</div>
         <i class="iconfont icon-menu"></i>
@@ -187,17 +187,33 @@
         </swiper>
       </div>
     </a-card>
+    <!-- 封装好的高级组件 -->
     <m-list-card
       icon="caidananniudianji"
-      title="新闻资讯测试"
+      title="新闻资讯-ListCard组件"
       :categories="newsCats"
     >
-      <div class="py-2" v-for="n in 5" :key="n">
-        <span>[新闻]</span>
-        <span>|</span>
-        <span>春和景明柳垂莺娇，峡谷好礼随春报到</span>
-        <span>06/12</span>
-      </div>
+      <!-- 在父组件里，不通过循环，直接拿到子组件里的具名slot的数据，
+      这样的好处是 子组件的内容可以由父组件决定怎么展示 -->
+      <template #items="{ category }">
+        <div
+          class="py-2 fs-lg d-flex"
+          v-for="(item, index) in category.newsList"
+          :key="index"
+        >
+          <span class="text-info" v-text="`[${item.categoryName}]`"
+            >[新闻]</span
+          >
+          <span class="px-1">|</span>
+          <span
+            class="flex-1 text-dark-1 text-ellipsis pr-2"
+            v-text="item.title"
+            >春和景明柳垂莺娇，峡谷好礼随春报到</span
+          >
+          <span class="text-grey-1 fs-sm">{{ item.createdAt | date }}</span>
+        </div>
+      </template>
+      <!-- <template v-slot:heros="{ category }"></template> -->
     </m-list-card>
     <m-card icon="caidananniudianji" title="新闻资讯-局部组件"></m-card>
     <m-card icon="caidananniudianji" title="英雄列表"></m-card>
@@ -208,9 +224,15 @@
 </template>
 
 <script>
+  import dayjs from 'dayjs';
   // @ is an alias to /src
   import Card from '../components/Card';
   export default {
+    filters: {
+      date(val) {
+        return dayjs(val).format('MM/DD');
+      },
+    },
     name: 'Home',
     components: { 'm-card': Card },
     data() {
@@ -227,22 +249,76 @@
           },
         },
         isCollapse: true,
+        // 定义ListCard组件的数据结构
+        // newsCats: [
+        //   {
+        //     _id: 1,
+        //     name: '热门',
+        //     newsList: [
+        //       {
+        //         _id: 222,
+        //         categoryName: '公告',
+        //         title: '景明柳垂莺娇，峡谷好礼随春报到',
+        //         date: '06/01',
+        //       },
+        //       {
+        //         _id: 203,
+        //         categoryName: '公告',
+        //         title: '景明柳垂莺娇，峡谷好礼随春报到',
+        //         date: '06/01',
+        //       },
+        //       {
+        //         _id: 204,
+        //         categoryName: '公告',
+        //         title: '景明柳垂莺娇，峡谷好礼随春报到',
+        //         date: '06/01',
+        //       },
+        //       {
+        //         _id: 201,
+        //         categoryName: '新闻',
+        //         title: '景明柳垂莺娇，峡谷好礼随春报到',
+        //         date: '06/01',
+        //       },
+        //       {
+        //         _id: 202,
+        //         categoryName: '赛事',
+        //         title: '景明柳垂莺娇，峡谷好礼随春报到',
+        //         date: '06/01',
+        //       },
+        //     ],
+        //   },
+        // ],
+        // newsList的简单写法，新建数组5填充1，再map循环替换成对象
         newsCats: [
           {
+            _id: 1,
             name: '热门',
-            newsList: [
-              {
-                categoryName: '公告',
-                title: '景明柳垂莺娇，峡谷好礼随春报到',
-                date: '06/01',
-              },
-            ],
+            newsList: new Array(5).fill(1).map((v) => ({
+              _id: v + 201,
+              categoryName: '赛事',
+              title: '景明柳垂莺娇，峡谷好礼随春报到',
+              date: '06/01',
+            })),
+          },
+          {
+            _id: 2,
+            name: '新闻',
+            newsList: new Array(5).fill(2).map((v) => ({
+              _id: v + 202,
+              categoryName: '赛事',
+              title: '景明柳垂莺娇，峡谷好礼随春报到',
+              date: '06/01',
+            })),
           },
         ],
+        // 后台数据
+        // newsCats: [],
         herosCats: [],
       };
     },
-
+    created() {
+      this.fetchNewsCats();
+    },
     mounted() {
       console.log('Current Swiper instance object', this.swiper);
       //   this.swiper.slideTo(3, 1000, false);
@@ -253,6 +329,10 @@
       },
     },
     methods: {
+      async fetchNewsCats() {
+        const res = await this.$http.get('news/list');
+        this.newsCats = res.data;
+      },
       switchActive() {
         this.isCollapse = !this.isCollapse;
       },

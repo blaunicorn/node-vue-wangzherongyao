@@ -6,6 +6,8 @@ Vue.config.productionTip = false
 import './style/index.scss'
 import router from './router'
 
+import http from './http'
+Vue.prototype.$http = http
 
 // require styles
 import 'swiper/css/swiper.css'

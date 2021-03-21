@@ -36,7 +36,7 @@
     methods: {
       async fetch() {
         const params = {
-          limit: 10,
+          limit: 100,
         };
         // 查询字符串传参 用 req.query接收   eg. http://localhost:9999/axios?id=1000  服务端 app.get('/axios', (req, res)
         // restful风格URL  传参 用req.params.id 接收 eg.http://localhost:9999/axios/1000  服务端需要:id

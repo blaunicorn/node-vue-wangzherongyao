@@ -2148,7 +2148,7 @@ import './assets/iconfont/iconfont.css'
       <i class="iconfont icon-menu"></i>
     </div>
     <div class="card-body pt-3">
-      <!-- 使用插槽功能 -->
+      <!-- 使用插槽功能,展示父组件的内容 -->
       <slot></slot>
     </div>
   </div>
@@ -2200,7 +2200,6 @@ Vue.component('a-card', Card)
     <m-card icon="caidananniudianji" title="图文攻略"></m-card>
   </div>
 </template>
-
 <script>
   // @ is an alias to /src
   import Card from '../components/Card';
@@ -2210,22 +2209,650 @@ Vue.component('a-card', Card)
     ...
 ```
 
-
 ### 3.11 web页继续优化card，抽象首页card的各个部分，形成listcard、nav、swiper组件
+```js
+// web\src\components\ListCard.vue 理想是传入数据，直接展示新闻、英雄列表和图文攻略
+<template>
+  <a-card :icon="icon" :title="title">
+    <!-- 应用插槽展示数据 -->
+    <div class="nav jc-between">
+      <div
+        class="nav-item"
+        :class="{ active: active === index }"
+        v-for="(category, index) in categories"
+        :key="index"
+        @click="
+          () => {
+            active = index;
+            $refs.list.$swiper.slideTo(index);
+          }
+        "
+      >
+        <div class="nav-link" v-text="category.name">热门</div>
+      </div>
+    </div>
+    <div class="card-body pt-3">
+      <swiper
+        ref="list"
+        @slide-change="() => (active = $refs.list.$swiper.realIndex)"
+      >
+        <swiper-slide v-for="(category, index) in categories" :key="index">
+          <!-- 具名插槽，把子组件的数据再传递给父组件，便于后面区分新闻资讯、英雄列表、视频列表的不同样式展示 -->
+          <slot name="items" :category="category"></slot>
+        </swiper-slide>
+      </swiper>
+    </div>
+  </a-card>
+</template>
+
+<script>
+  export default {
+    props: {
+      icon: { type: String, required: true },
+      title: {
+        type: String,
+        required: true,
+      },
+      // 分类
+      categories: { type: Array, required: true },
+    },
+    data() {
+      return {
+        active: 0,
+      };
+    },
+  };
+</script>
+
+<style>
+</style>
+```
+
+```js
+// web\src\main.js
+// 全局引用CardList组件
+import ListCard from './components/ListCard.vue'
+Vue.component('m-list-card', ListCard)
+```
+ 
+```js
+// Web界面中的swiper的点击和滑动控制样式功能
+// 点击转跳区域
+@click = "$refs.list.$swiper.slideTo(i)"
+//区域改变，active的样式也跟随变化
+@slide-change="() => active = $refs.list.$swiper.realIndex"
+```
+
+```js
+// web\src\views\Home.vue 引入ListCard组件
+    <!-- 封装好的高级组件 -->
+    <m-list-card
+      icon="caidananniudianji"
+      title="新闻资讯-ListCard组件"
+      :categories="newsCats"
+    >
+      <!-- 在父组件里，不通过循环，直接拿到子组件里的具名slot的数据，
+      这样的好处是 子组件的内容可以由父组件决定怎么展示 -->
+      <template #items="{ category }">
+        <div
+          class="py-2"
+          v-for="(item, index) in category.newsList"
+          :key="index"
+        >
+          <span v-text="item.categoryName">[新闻]</span>
+          <span>|</span>
+          <span v-text="item.title + item._id"
+            >春和景明柳垂莺娇，峡谷好礼随春报到</span
+          >
+          <span v-text="item.date">06/12</span>
+        </div>
+      </template>
+      <!-- <template v-slot:heros="{ category }"></template> -->
+    </m-list-card>
+```
+### 3.12 web页新闻资讯的数据录入
 ```js
 // web\src\components\ListCard.vue 理想是传入数据，直接展示新闻、英雄列表和图文攻略
 
 ```
-  
-### 3.12 Web界面中的swiper的点击和滑动控制样式功能
 ```js
-//点击转跳区域
-@click = "$refs.list.swiper.slideTo(i)"
-//区域改变，active的样式也跟随变化
-@slide-change="() => active = $refs.list.swiper.realIndex"
+web\src\views\Main.vue
+<style lang="scss">
+  //   增加吸顶效果
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+  }
+</style>
+```
+```js
+// console终端中输出html中的文字
+$$('.news_list_cont a').map(el=>el.innerHTML)
+$$('.news_list .title').map(el=>el.innerHTML).slice(5)
+```
+```js
+// 写一个接口去自动录入新闻资讯的标题
+// 1.server端引入插件，可以直接读取文件夹下所有文件
+npm install require-all --save
+
+// server\plugins\db.js使用该插件
+    // 2.（）当成一个函数使用，再传入一个路径,回退到上级路径
+    require('require-all')(__dirname + '/../models')
+    //初始化数据
+
+ // server\routes\web\index.js
+module.exports = app => {
+    const router = require('express').Router()
+    //通过访问一个路径来写入数据,这样是数据能通过js的方式来写入数据库，不用自己在后台一个个添加
+    // 初始化新闻数据
+
+    // const Article = require('../../models/Article') // 这种要一个个引入相对麻烦些
+    const mongoose = require('mongoose')// 另外一种方式是直接通过mongoose读取数据库
+    // 使用模型
+    const Artice = mongoose.model('Article')
+    const Category = mongoose.model('Category')
+
+    router.get('/news/init', async (req, res) => {
+        const parent = await Category.findOne({
+            name: '新闻分类'
+        })
+        console.log(parent)
+        //获取分类，lean表示获取纯粹的json数组，用where限制分类新闻分类
+        const cats = await Category.find().lean().where({
+            parent: parent
+        });
+        // console.log(cats);
+        const newsTitles = ["嫦娥皮肤设计大赛最终投票开启公告", "狄某有话说｜姜子牙化身“象棋高手”？", "3月17日外挂专项打击公告", "3月17日“演员”惩罚名单", "3月17日净化游戏环境声明及处罚公告", "3月16日体验服停机更新公告", "老亚瑟的答疑时间：貂蝉-仲夏夜之梦海报优化计划，王昭君-凤凰于飞优化海报过程稿", "嫦娥皮肤设计大赛人气创意奖、优秀创意奖公布", "3月16日账号注销流程变更说明", "春和景明柳垂莺娇，峡谷好礼随春报到", "3月16日全服不停机更新公告", "3月13日体验服不停机更新公告", "3月12日体验服停机更新公告", "3月12日体验服停机更新公告", "狄某有话说｜江湖规矩，对线不打“WiFi”牛", "第三届王者荣耀全国大赛赛事日历公布", "嫦娥皮肤设计大赛最终投票开启公告", "狄某有话说｜姜子牙化身“象棋高手”？", "老亚瑟的答疑时间：貂蝉-仲夏夜之梦海报优化计划，王昭君-凤凰于飞优化海报过程稿", "嫦娥皮肤设计大赛人气创意奖、优秀创意奖公布", "超丰厚奖励等你赢！第三届王者荣耀全国大赛北京海选首站（北京丰科万达站）即将开赛！", "第三届王者荣耀全国大赛——安徽省再次启航！", "第三届王者荣耀全国大赛城市赛道——第一期海选赛赛点信息", "斗鱼新势力战队选拔赛", "狄某有话说｜江湖规矩，对线不打“WiFi”牛", "老亚瑟的答疑时间：貂蝉-仲夏夜之梦及金色仲夏夜优化后海报展示", "王者荣耀·女神节 峡谷女神才艺showtime还不来围观！", "狄某有话说｜春节回顾，2月对局环境数据盘点！", "嫦娥皮肤设计大赛首轮投票开启公告", "老亚瑟的答疑时间：皮肤优化沟通月历上线，公孙离-祈雪灵祝优化进度展示"]
+        // 打算制造随机分类，slice是为了防止影响数据本身，复制一份数据去排序。Math.random()-0.5是让数据在正负0.5之间随机，slice(0,2)是取两个数
+        const randomCats = cats.slice(0).sort((a, b) => Math.random() - 0.5).slice(0, 2)
+        const newList = newsTitles.map(title => {
+            return {
+                categories: randomCats, // 打乱随机取2个分类
+                title: title
+            }
+        })
+        // 清空原有数据库,再插入数据
+        await Artice.deleteMany({})
+        await Artice.insertMany(newList)
+        res.send(newList)
+    })
+
+    app.use('/web/api', router)
+}
+
+// server\index.js
+// 导入web 路由
+require('./routes/web')(app)
+
+//3. http://localhost:3000/web/api/news/init  后端api可以访问到数据
+``` 
+### 3.13 web页新闻资讯的数据接口
+```js
+// server\models\Category.js
+// 优化完善分类模型，建立虚拟联接
+const mongoose = require('mongoose')
+
+// 定义模型字段
+const schema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+
+    parent: { type: mongoose.SchemaTypes.ObjectId, ref: 'Category' } // 类型为ObjectId 并关联Category表
+})
+
+// 3.13 设置虚拟字段：子分类,类似vue中的计算属性，它是通过已定义的schema属性的计算\组合\拼接得到的新的值
+schema.virtual('children', {
+    localField: '_id', // 内键,schema对应的模型Title的_id
+    foreignField: 'parent', //外键,关联模型Category的parent键
+    justOne: false, // 只查询一条数据
+    ref: 'Category' // 关联的模型
+})
+
+// 3.13 分类关联新闻标题
+schema.virtual('newsList', {
+    localField: '_id', // 内键,schema对应的模型Category的_id
+    foreignField: 'categories', //外键,关联模型Article的categories键
+    justOne: false, // 只查询一条数据
+    ref: 'Article' // 关联的模型
+})
+
+
+// 导出Category模型，哪里需要用，哪里引入，引入到 routes/admin/index.js
+module.exports = mongoose.model('Category', schema)
 ```
 
-### 12、格式化时间用的是dayjs
+```js
+    // server\routes\web\index.js
+    // 新增 新闻列表接口，用于前端调用。以分类为主题，关联新闻
+    router.get('/news/list', async (req, res) => {
+        // //3.13 调出子分类，顺便调出子分类里的新闻，用populate关联,用lean展示出来，但存在问题不能查询单独的分类数量
+        // const parent = await Category.findOne({
+        //     name: '新闻资讯'
+        // }).populate({
+        //     path: 'children',
+        //     populate: {
+        //         path: 'newsList'
+        //     }
+        // }).lean()
+        // 3.13 另一种方式，聚合查询,可以同时查询多次，聚合参数叫聚合管道
+        const parent = await Category.findOne({
+            name: '新闻资讯'
+        })
+        const cats = await Category.aggregate([
+            // 条件查询:字段 = 上级分类，找到分类，这一步与where查询没有太大区别
+            { $match: { parent: parent._id } },
+            // 类似与关系数据库的关联联接，左关联联接left join
+            // 定义模型是，第三个参数collection省略了，它表示集合的名字，省略后默认是模型的复数小写。
+            // 从哪个集合，本地键，外键、as给起个名字
+            { $lookup: { from: 'articles', localField: '_id', foreignField: 'categories', as: 'newsList' } },
+            // 定义要几个.添加\修改字段，特殊操作符slice 
+            //  每一个分类只要5个
+            { $addFields: { newsList: { $slice: ['$newsList', 5] } } }
+        ]
+        )
+        const subCats = cats.map(v => v._id)
+        // 热门分类，是独立于四个分类，新增的,不限制分类，条件是 子分类是那些 in操作符会筛选出字段值等于制定数组中任何值的文档
+        cats.unshift({
+            name: '热门',
+            newsList: await Artice.find().where({
+                categories: { $in: subCats }
+                // 关联 categories字段，把_id拓展为名称
+            }).populate('categories').limit(5).lean()
+        })
+        // 把newsList上增加catergoryName，方便前端显示
+        cats.map(cat => {
+            cat.newsList.map(news => {
+                news.categoryName = cat.name === '热门' ? news.categories[0].name : cat.name
+                return news
+            })
+            return cat
+        })
+
+        res.send(cats)
+    })
+```
+
+### 3.14 web页首页新闻资讯界面展示
+前端安装 axios 配置http.js 偷个懒，和admin一致，注意的是请求地址为
+```js
+ baseURL: 'http://localhost:3000/web/api'
+```
+```js
+// web端安装日期时间格式化工具
+npm install dayjs --save
+```
+```js
+// 单行文字，多余的省略掉
+// text overflow
+.text-ellipsis {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+```
+完整代码如下
+```js
+// web\src\views\Home.vue
+<template>
+  <div class="home">
+    <swiper ref="mySwiper" :options="swiperOptions">
+      <swiper-slide>
+        <img
+          class="w-100"
+          src="../assets/images/201.jpeg"
+          alt=""
+          sizes=""
+          srcset=""
+        />
+      </swiper-slide>
+      <swiper-slide>
+        <img
+          class="w-100"
+          src="../assets/images/202.jpeg"
+          alt=""
+          sizes=""
+          srcset=""
+        />
+      </swiper-slide>
+      <swiper-slide>
+        <img
+          class="w-100"
+          src="../assets/images/203.jpeg"
+          alt=""
+          sizes=""
+          srcset=""
+        />
+      </swiper-slide>
+      <swiper-slide>
+        <img
+          class="w-100"
+          src="../assets/images/204.jpeg"
+          alt=""
+          sizes=""
+          srcset=""
+        />
+      </swiper-slide>
+      <div
+        class="swiper-pagination pagination-home text-right px-3 pb-2"
+        slot="pagination"
+      ></div>
+    </swiper>
+    <!-- end of swiper -->
+    <!-- 图标导航 -->
+    <!-- 外部容器text-center pt-3 内部容易mb-3 这样能统一样式 -->
+    <transition name="fade" mode="out-in">
+      <div
+        class="nav-icons bg-white mt-3 d-flex flex-wrap text-center pt-3 text-grey-1"
+      >
+        <!-- <div class="nav-icons bg-white mt-3 text-center pt-3 text-grey-1"> -->
+        <!-- <div class="nav-item mb-3" v-for="n in 10" :key="n">
+        <i class="sprite sprite-news"></i>
+        <div class="py-2">爆料站</div>
+      </div> -->
+        <!-- 处理底部的收起按钮，需要把d-flex flex-wrap 放在子集的div上，跟它平级写个收起的div -->
+
+        <div class="d-flex flex-wrap" :class="{ toggleActive: isCollapse }">
+          <a href class="nav-item my-3">
+            <i class="sprite sprite-news"></i>
+            <div>爆料站</div>
+          </a>
+          <a href class="nav-item my-3">
+            <i class="sprite sprite-practice"></i>
+            <div>故事站</div>
+          </a>
+          <a href class="nav-item my-3">
+            <i class="sprite sprite-affair"></i>
+            <div>周边商城</div>
+          </a>
+          <a href class="nav-item my-3 border-none">
+            <i class="sprite sprite-mall"></i>
+            <div>体验服</div>
+          </a>
+          <a href class="nav-item my-2">
+            <i class="sprite sprite-start"></i>
+            <div>新人专区</div>
+          </a>
+          <a href class="nav-item my-2">
+            <i class="sprite sprite-honour"></i>
+            <div>荣耀·传承</div>
+          </a>
+          <a href class="nav-item my-2">
+            <i class="sprite sprite-community"></i>
+            <div>同人社区</div>
+          </a>
+          <a href class="nav-item my-2 border-none">
+            <i class="sprite sprite-base"></i>
+            <div>王者营地</div>
+          </a>
+          <a href class="nav-item my-2">
+            <i class="sprite sprite-echart"></i>
+            <div>公众号</div>
+          </a>
+          <a href class="nav-item my-2">
+            <i class="sprite sprite-edition"></i>
+            <div>版本介绍</div>
+          </a>
+        </div>
+        <!-- <div class="d-flex flex-wrap"> -->
+        <div
+          class="bg-light py-2 fs-sm;"
+          style="width: 100%"
+          @click="switchActive"
+        >
+          <i
+            class="sprite sprite-arrow mr-1"
+            :style="{ transform: isCollapse ? 'rotate(180deg)' : '' }"
+          ></i>
+          <span class="retract">{{ isCollapse ? '收起' : '展开' }}</span>
+        </div>
+      </div>
+    </transition>
+    <!-- end of 图标模块 -->
+    <!-- begin of 字体图标 -->
+    <!-- <i class="iconfont icon-news text-primary"></i> -->
+    <!-- end of 字体图标 -->
+    <!-- begin of 新闻资讯卡片 -->
+    <div class="card mt-3 p-3 bg-white">
+      <div class="card-header d-flex ai-center pb-3">
+        <i class="iconfont icon-caidananniudianji" style="color: deeppink"></i>
+        <div class="fs-xl flex-1 px-2">新闻资讯</div>
+        <i class="iconfont icon-menu"></i>
+      </div>
+      <div class="card-body pt-3">
+        <div class="nav jc-between">
+          <div class="nav-item active">
+            <div class="nav-link">热门</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-link">新闻</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-link">新闻</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-link">新闻</div>
+          </div>
+          <div class="nav-item">
+            <div class="nav-link">新闻</div>
+          </div>
+        </div>
+        <div class="pt-3">
+          <swiper>
+            <swiper-slide v-for="m in 5" :key="m"
+              ><div class="py-2" v-for="n in 5" :key="n">
+                <span>[新闻]</span>
+                <span>|</span>
+                <span>春和景明柳垂莺娇，峡谷好礼随春报到</span>
+                <span>06/12</span>
+              </div></swiper-slide
+            >
+          </swiper>
+        </div>
+      </div>
+    </div>
+    <a-card icon="caidananniudianji" title="新闻资讯-全局组件">
+      <!-- 应用插槽展示数据 -->
+      <div class="nav jc-between">
+        <div class="nav-item active">
+          <div class="nav-link">热门</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-link">新闻</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-link">新闻</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-link">新闻</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-link">新闻</div>
+        </div>
+      </div>
+      <div class="pt-3">
+        <swiper>
+          <swiper-slide v-for="m in 5" :key="m"
+            ><div class="py-2" v-for="n in 5" :key="n">
+              <span>[新闻]</span>
+              <span>|</span>
+              <span>春和景明柳垂莺娇，峡谷好礼随春报到</span>
+              <span>06/12</span>
+            </div></swiper-slide
+          >
+        </swiper>
+      </div>
+    </a-card>
+    <!-- 封装好的高级组件 -->
+    <m-list-card
+      icon="caidananniudianji"
+      title="新闻资讯-ListCard组件"
+      :categories="newsCats"
+    >
+      <!-- 在父组件里，不通过循环，直接拿到子组件里的具名slot的数据，
+      这样的好处是 子组件的内容可以由父组件决定怎么展示 -->
+      <template #items="{ category }">
+        <div
+          class="py-2 fs-lg d-flex"
+          v-for="(item, index) in category.newsList"
+          :key="index"
+        >
+          <span class="text-info" v-text="`[${item.categoryName}]`"
+            >[新闻]</span
+          >
+          <span class="px-1">|</span>
+          <span
+            class="flex-1 text-dark-1 text-ellipsis pr-2"
+            v-text="item.title"
+            >春和景明柳垂莺娇，峡谷好礼随春报到</span
+          >
+          <span class="text-grey-1 fs-sm">{{ item.createdAt | date }}</span>
+        </div>
+      </template>
+      <!-- <template v-slot:heros="{ category }"></template> -->
+    </m-list-card>
+    <m-card icon="caidananniudianji" title="新闻资讯-局部组件"></m-card>
+    <m-card icon="caidananniudianji" title="英雄列表"></m-card>
+    <m-card icon="caidananniudianji" title="精彩视频"></m-card>
+    <m-card icon="caidananniudianji" title="图文攻略"></m-card>
+    <!-- end of 新闻资讯卡片 -->
+  </div>
+</template>
+
+<script>
+  import dayjs from 'dayjs';
+  // @ is an alias to /src
+  import Card from '../components/Card';
+  export default {
+    filters: {
+      date(val) {
+        return dayjs(val).format('MM/DD');
+      },
+    },
+    name: 'Home',
+    components: { 'm-card': Card },
+    data() {
+      return {
+        swiperOptions: {
+          slidesPerView: 1,
+          autoplay: {
+            disableOnInteraction: false,
+            delay: 2000,
+          },
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+        },
+        isCollapse: true,
+        // 定义ListCard组件的数据结构
+        // newsList的简单写法，新建数组5填充1，再map循环替换成对象
+        newsCats: [
+          {
+            _id: 1,
+            name: '热门',
+            newsList: new Array(5).fill(1).map((v) => ({
+              _id: v + 201,
+              categoryName: '赛事',
+              title: '景明柳垂莺娇，峡谷好礼随春报到',
+              date: '06/01',
+            })),
+          },
+          {
+            _id: 2,
+            name: '新闻',
+            newsList: new Array(5).fill(2).map((v) => ({
+              _id: v + 202,
+              categoryName: '赛事',
+              title: '景明柳垂莺娇，峡谷好礼随春报到',
+              date: '06/01',
+            })),
+          },
+        ],
+        // 后台数据
+        // newsCats: [],
+        herosCats: [],
+      };
+    },
+    created() {
+      this.fetchNewsCats();
+    },
+    mounted() {
+      console.log('Current Swiper instance object', this.swiper);
+      //   this.swiper.slideTo(3, 1000, false);
+    },
+    computed: {
+      swiper() {
+        return this.$refs.mySwiper.$swiper;
+      },
+    },
+    methods: {
+      async fetchNewsCats() {
+        const res = await this.$http.get('news/list');
+        this.newsCats = res.data;
+      },
+      switchActive() {
+        this.isCollapse = !this.isCollapse;
+      },
+    },
+  };
+</script>
+<style lang='scss' scope>
+  @import '../style/variables.scss';
+  //  重新定义一个class，便于单独管理各个页面的swipers
+  .pagination-home {
+    .swiper-pagination-bullet {
+      display: inline-block;
+      opacity: 1;
+      border-radius: 0.1538rem;
+      background-color: map-get($colors, 'white');
+      //   background-color: #ffffff;
+      &.swiper-pagination-bullet-active {
+        background: map-get($colors, 'info');
+      }
+    }
+  }
+  .nav-icons {
+    border-top: 1px solid $border-color;
+    border-bottom: 1px solid $border-color;
+    .nav-item {
+      width: 25%;
+      // 取消右侧的边框
+      border-right: 1px solid $border-color;
+      &:nth-child(4n) {
+        border-right: none;
+      }
+    }
+  }
+  .toggleActive {
+    height: 60px;
+    overflow: hidden;
+  }
+  .fade-enter {
+    opacity: 0;
+  }
+  .fade-leave {
+    opacity: 1;
+  }
+  .fade-leave-active,
+  .fade-enter-active {
+    transition: opacity 0.9s;
+  }
+</style>
+
+```
+
+### 3.15 web首页英雄列表提取官方数据
+```js
+$$('.hero-nav > li').map(( li,i)=>{return {heros:$$('li',$$('.hero-list')[i]).map(el=>{return {name:$$('h3',el)[0].innerHTML}}),name:li.innerText}})
+```
+```js
+$$('.hero-nav > li').map(( li,i)=>{return {heros:$$('li',$$('.hero-list')[i]).map(el=>{return {name:$$('h3',el)[0].innerHTML,avatar:$$('img',el)[0].src}}),name:li.innerText}})
+```
+
 
 ### 13、 使用jsonwebtoken进行登陆数据传输
 

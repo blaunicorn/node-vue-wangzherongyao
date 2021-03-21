@@ -5,6 +5,9 @@ const schema = new mongoose.Schema({
     title: { type: String },
     categories: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Category' }], // 可以多个，类型为ObjectId 并关联Item表
     body: { type: String }
+}, {
+    // 增加个时间戳
+    timestamps: true
 })
 
 // 导出Item模型，哪里需要用，哪里引入，引入到 routes/admin/index.js

@@ -37,4 +37,5 @@ const schema = new mongoose.Schema({
 })
 
 // 导出Item模型，哪里需要用，哪里引入，引入到 routes/admin/index.js
-module.exports = mongoose.model('Hero', schema)
+// 需要注意的是如果指定第三个参数 集合 如果自动指定会变成heros这是不合理的，需要手动指定为heroes
+module.exports = mongoose.model('Hero', schema, 'heroes')
