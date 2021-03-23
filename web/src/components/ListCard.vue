@@ -45,6 +45,8 @@
     data() {
       return {
         swiperOptions: {
+          // 自动高度
+          autoHeight: true,
           slidesPerView: 1,
           //   autoplay: {
           //     disableOnInteraction: false,

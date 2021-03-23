@@ -2847,12 +2847,122 @@ npm install dayjs --save
 
 ### 3.15 web首页英雄列表提取官方数据
 ```js
+// 简化版
 $$('.hero-nav > li').map(( li,i)=>{return {heros:$$('li',$$('.hero-list')[i]).map(el=>{return {name:$$('h3',el)[0].innerHTML}}),name:li.innerText}})
 ```
 ```js
-$$('.hero-nav > li').map(( li,i)=>{return {heros:$$('li',$$('.hero-list')[i]).map(el=>{return {name:$$('h3',el)[0].innerHTML,avatar:$$('img',el)[0].src}}),name:li.innerText}})
+// 获取img链接,并转成json数据
+JSON.stringify($$('.hero-nav > li').map(( li,i)=>{return {heros:$$('li',$$('.hero-list')[i]).map(el=>{return {name:$$('h3',el)[0].innerHTML,avatar:$$('img',el)[0].src}}),name:li.innerText}}))
+```
+### 3.16 web首页server导入英雄列表数据
+```js
+// server\routes\web\index.js
+    // 导入英雄列表接口
+    router.get('/heroes/init', async (req, res) => {
+        // 清空原有数据库,再插入数据
+        await Hero.deleteMany({})
+        const rawData = [获取的页面英雄数据]
+        // 数组用for in 循环 返回的是索引值。 用of 返回的对象的数据
+        for (let cat of rawData) {
+            if (cat.name === '热门') {
+                continue
+            }
+            // 增加分类的id,找到当前分类在数据库中对应的数据
+            const category = await Category.findOne({
+                name: cat.name
+            })
+            console.log(cat, category)
+            cat.heroes = cat.heroes.map(hero => {
+                // 可以写id，但mongodb足够智能，可以自动判断。
+                // 对象引用传值，改了里面的也相当于改了本身
+                hero.categories = [category]
+                // hero.categories = [category.id]
+                return hero
+            })
+            // 录入英雄
+
+            await Hero.insertMany(cat.heroes)
+
+        }
+        res.send(await Hero.find())
 ```
 
+### 3.17 web首页展示英雄列表
+```js
+// server\routes\web\index.js
+    // 英雄列表接口
+    router.get('/hero/list', async (req, res) => {
+        // 查找英雄列表
+        const parent = await Category.findOne({
+            name: '英雄分类'
+        })
+        // 聚合管道查询，多个条件1.查所有parent._id字段=上面的parent._id  2.关联查询heroes集合，本地字段_id,外键，也就是在heroes中的字段是categories，as 是作为什么名字
+        const cats = await Category.aggregate([
+            { $match: { parent: parent._id } },
+            {
+                $lookup: {
+                    from: 'heroes',
+                    localField: '_id',
+                    foreignField: 'categories',
+                    as: 'heroList'
+                }
+            },
+            // 查出后，添加修改一个字段，把heroList 从原有的所有个字段中取10个，暂时不需要限制取几条
+            // {
+            //     $addFields: {
+            //         heroList: { $slice: ['$heroList', 10] }
+            //     }
+            // }
+        ])
+        // console.log(cats)
+        // 由于没有热门 这个分类，需要我们手动去查询添加。查询hero模型，关联categories模型，限制10条，
+        const subCats = cats.map(v => v._id)
+        cats.unshift({
+            name: '热门',
+            heroList: await Hero.find().where({
+                categories: { $in: subCats }
+            }).limit(10).lean()
+            // }).populate('categories').limit(10).lean()
+        })
+        // console.log(cats)
+        // cats.map(cat => {
+        //     cat.heroList.map(news => {
+        //         news.categoryName = (cat.name === '热门') ? news.categories[0].name : cat.name
+        //         return news
+        //     })
+        //     return cat
+        // })
+        res.send(cats)
+    })
+```
+
+```js
+// web\src\views\Home.vue
+    <m-list-card
+      icon="hero"
+      title="英雄分类-ListCard组件"
+      :categories="heroCats"
+    >
+      <!-- 在父组件里，不通过循环，直接拿到子组件里的具名slot的数据，
+      这样的好处是 子组件的内容可以由父组件决定怎么展示 -->
+      <template #items="{ category }">
+        <div class="d-flex flex-wrap" style="margin: 0 -0.5rem">
+          <div
+            class="p-2 text-center"
+            v-for="(item, index) in category.heroList"
+            :key="index"
+            style="width: 20%"
+          >
+            <img :src="item.avatar" class="w-100" alt="" />
+            <div>{{ item.name }}</div>
+          </div>
+        </div>
+      </template>
+      <!-- <template v-slot:heros="{ category }"></template> -->
+    </m-list-card>
+```
+
+### 3.18 web首页展示英雄列表
 
 ### 13、 使用jsonwebtoken进行登陆数据传输
 

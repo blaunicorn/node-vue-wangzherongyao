@@ -114,5 +114,50 @@ module.exports = app => {
         }
         res.send(await Hero.find())
     })
+
+    // 英雄列表接口
+    router.get('/hero/list', async (req, res) => {
+        // 查找英雄列表
+        const parent = await Category.findOne({
+            name: '英雄分类'
+        })
+        // 聚合管道查询，多个条件1.查所有parent._id字段=上面的parent._id  2.关联查询heroes集合，本地字段_id,外键，也就是在heroes中的字段是categories，as 是作为什么名字
+        const cats = await Category.aggregate([
+            { $match: { parent: parent._id } },
+            {
+                $lookup: {
+                    from: 'heroes',
+                    localField: '_id',
+                    foreignField: 'categories',
+                    as: 'heroList'
+                }
+            },
+            // 查出后，添加修改一个字段，把heroList 从原有的所有个字段中取10个，暂时不需要限制取几条
+            // {
+            //     $addFields: {
+            //         heroList: { $slice: ['$heroList', 10] }
+            //     }
+            // }
+        ])
+        // console.log(cats)
+        // 由于没有热门 这个分类，需要我们手动去查询添加。查询hero模型，关联categories模型，限制10条，
+        const subCats = cats.map(v => v._id)
+        cats.unshift({
+            name: '热门',
+            heroList: await Hero.find().where({
+                categories: { $in: subCats }
+            }).limit(10).lean()
+            // }).populate('categories').limit(10).lean()
+        })
+        // console.log(cats)
+        // cats.map(cat => {
+        //     cat.heroList.map(news => {
+        //         news.categoryName = (cat.name === '热门') ? news.categories[0].name : cat.name
+        //         return news
+        //     })
+        //     return cat
+        // })
+        res.send(cats)
+    })
     app.use('/web/api', router)
 }

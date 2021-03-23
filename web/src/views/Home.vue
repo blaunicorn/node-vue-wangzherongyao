@@ -215,6 +215,30 @@
       </template>
       <!-- <template v-slot:heros="{ category }"></template> -->
     </m-list-card>
+    <!-- 英雄列表开始 -->
+    <m-list-card
+      icon="hero"
+      title="英雄分类-ListCard组件"
+      :categories="heroCats"
+    >
+      <!-- 在父组件里，不通过循环，直接拿到子组件里的具名slot的数据，
+      这样的好处是 子组件的内容可以由父组件决定怎么展示 -->
+      <template #items="{ category }">
+        <div class="d-flex flex-wrap" style="margin: 0 -0.5rem">
+          <div
+            class="p-2 text-center"
+            v-for="(item, index) in category.heroList"
+            :key="index"
+            style="width: 20%"
+          >
+            <img :src="item.avatar" class="w-100" alt="" />
+            <div>{{ item.name }}</div>
+          </div>
+        </div>
+      </template>
+      <!-- <template v-slot:heros="{ category }"></template> -->
+    </m-list-card>
+    <!-- 英雄列表结束-->
     <m-card icon="caidananniudianji" title="新闻资讯-局部组件"></m-card>
     <m-card icon="caidananniudianji" title="英雄列表"></m-card>
     <m-card icon="caidananniudianji" title="精彩视频"></m-card>
@@ -313,11 +337,12 @@
         ],
         // 后台数据
         // newsCats: [],
-        herosCats: [],
+        heroCats: [],
       };
     },
     created() {
       this.fetchNewsCats();
+      this.fetchheroCats();
     },
     mounted() {
       console.log('Current Swiper instance object', this.swiper);
@@ -329,6 +354,10 @@
       },
     },
     methods: {
+      async fetchheroCats() {
+        const res = await this.$http.get('hero/list');
+        this.heroCats = res.data;
+      },
       async fetchNewsCats() {
         const res = await this.$http.get('news/list');
         this.newsCats = res.data;
