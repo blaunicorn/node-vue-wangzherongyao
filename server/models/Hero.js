@@ -5,6 +5,8 @@ const schema = new mongoose.Schema({
     name: { type: String },
     parent: { type: mongoose.SchemaTypes.ObjectId, ref: 'Hero' }, // 类型为ObjectId 并关联Item表
     avatar: { type: String },
+    // 3.21新增banner字段
+    banner: { type: String },
     title: { type: String }, // 称号
     categories: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'Category' }], //分类可能是多个，譬如 法师/战士，所以类型是个数组，不用{}用[]
     // 打分
@@ -18,6 +20,9 @@ const schema = new mongoose.Schema({
     skills: [{
         icon: { type: String },
         name: { type: String },
+        // 3.21新增delay 和cost字段
+        delay: { type: String },
+        cost: { type: String },
         description: { type: String },
         tips: { type: String }
     }],
@@ -28,7 +33,7 @@ const schema = new mongoose.Schema({
     usageTips: { type: String },
     battleTips: { type: String },
     teamTips: { type: String },
-    // 搭档 选择英雄并增加描述
+    // 搭档 英雄关系 选择英雄并增加描述
     partners: [{
         hero: { type: mongoose.SchemaTypes.ObjectId, ref: 'Hero' },
         description: { type: String }

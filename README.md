@@ -1327,7 +1327,7 @@ const schema = new mongoose.Schema({
 module.exports = mongoose.model('Article',schema)
 ```
 
-#### 10.6、admin端修改ArticleList.vue
+#### 2.13.6、admin端修改ArticleList.vue
 ```js
 // admin\src\views\ArticleList.vue
 <template>
@@ -1490,7 +1490,7 @@ module.exports = mongoose.model('AdminUser', schema)
 router/index.js设置路由
 服务端安装插件，并建立模型，密码加盐 
 ```js
-npm i bcrypt  // 因gyp错误未安装成功，改成
+// npm i bcrypt  // 因gyp错误未安装成功，改成
 npm install bcryptjs
 ```
 
@@ -2962,9 +2962,258 @@ JSON.stringify($$('.hero-nav > li').map(( li,i)=>{return {heros:$$('li',$$('.her
     </m-list-card>
 ```
 
-### 3.18 web首页展示英雄列表
+### 3.18 web首页转跳新闻详情页
+```js
+// web\src\views\Article.vue
+<template>
+  <div class="page-article" v-if="model">
+    <div class="d-flex py-3 px-2 border-bottom">
+      <div class="iconfont icon-back text-blue"></div>
+      <strong class="flex-1 text-ellipsis text-blue pl-2">{{
+        model.title
+      }}</strong>
+      <div class="text-grey fs-xs">2019-06-19</div>
+    </div>
+    <div class="px-3 body fs-lg" v-html="model.body"></div>
+  </div>
+</template>
+<script>
+  export default {
+    props: {
+      id: {
+        required: true,
+      },
+    },
+    data() {
+      return {
+        model: null,
+      };
+    },
+    created() {
+      this.fetch();
+    },
+    methods: {
+      async fetch() {
+        // 调用是 用 实参，没有冒号
+        const res = await this.$http.get(`articles/${this.id}`);
+        this.model = res.data;
+      },
+    },
+  };
+</script>
 
-### 13、 使用jsonwebtoken进行登陆数据传输
+<style lang="scss" scoped>
+  //   img不能自动缩小，可能存在不能深度渲染的问题，可以去掉scoped 或者在img前增加深度渲染：：v-deep
+  // less中一般使用 >>> 或 /deep/
+  // scss中一般使用 ::v-deep
+  .page-article {
+    .icon-back {
+      font-size: 1.692308rem;
+    }
+    .body {
+      ::v-deep img {
+        max-width: 100%;
+        height: auto;
+      }
+      iframe {
+        width: 100%;
+        height: auto;
+      }
+    }
+  }
+</style>
+```
+
+```js
+// server\routes\web\index.js 增加获取新闻详情的api
+    // 文章详情
+    // :id 定义时是带冒号的形参
+    router.get('/articles/:id', async (req, res) => {
+        // console.log(req.params.id)
+        const data = await Article.findById(req.params.id)
+        res.send(data)
+    })
+```
+
+### 3.19 web新闻详情页完善
+```js
+// server\routes\web\index.js
+// 增加相关资讯
+    // 文章详情
+    // :id 定义时是带冒号的形参
+    router.get('/articles/:id', async (req, res) => {
+        // console.log(req.params.id)
+        // 3.19 增加lean()变成纯粹的json对象
+        const data = await Article.findById(req.params.id).lean()
+        data.related = await Article.find().where({
+            // 不包含查询本身
+            // title: { $ne: data.categories.title }
+            // 包含查询本身
+            categories: { $in: data.categories }
+        }).limit(2)
+        res.send(data)
+    })
+```
+
+```js
+// web\src\views\Article.vue
+    <div class="px-3 border-top py-3">
+      <div class="d-flex ai-center">
+        <i class="iconfont icon-menu"></i
+        ><strong class="text-blue fs-lg ml-2">相关资讯</strong>
+      </div>
+      <div class="pt-2">
+        <router-link
+          class="py-1 mt-2"
+          :to="`/articles/${item._id}`"
+          tag="div"
+          v-for="item in model.related"
+          :key="item._id"
+        >
+          {{ item.title }}
+        </router-link>
+      </div>
+    </div>
+```
+```js
+// 点击关联跳转只会改变id，不会自动刷新页面，需要通过watch去强制获取数据
+        watch: {
+      // 简写
+      id: 'fetch',
+      // 完整写法
+      //   id() {
+      //     this.fetch();
+      //   },
+    },
+```
+
+### 3.30 web端英雄详情页准备
+```js
+// 页面 web\src\views\Hero.vue
+<template>
+  <div class="page-hero" v-if="model">
+    <div
+      class="topbar bg-black py-2 text-white px-3 d-flex ai-center text-white"
+    >
+      <img src="../assets/logo.png" height="30" alt="" sizes="" srcset="" />
+      <!-- 用flex-1去占据全部的剩余空间 -->
+      <div class="px-2 flex-1">
+        <!-- <div class="text-white">王者荣耀</div> -->
+        <!-- <div class="text-dark-1">团队成就更多</div> -->
+        <!-- 不是上下两行了，需要用inline元素 -->
+        <span class="text-white">王者荣耀</span>
+        <span class="text-white ml-2">攻略站</span>
+      </div>
+      <router-link to="/" tag="div" class="jc-end">更多英雄 &gt;</router-link>
+    </div>
+  </div>
+</template>
+<script>
+  export default {
+    props: {
+      id: { required: true },
+    },
+    data() {
+      return {
+        model: null,
+      };
+    },
+    created() {
+      this.fetch();
+    },
+    methods: {
+      async fetch() {
+        const res = await this.$http.get(`heroes/${this.id}`);
+        this.model = res.data;
+      },
+    },
+  };
+</script>
+```
+
+```js
+    // 路由 web\src\router\index.js
+    // 因为不会集成顶部布局，所以不用放在main的children里
+    {
+        path: '/heroes/:id',
+        name: 'Hero',
+        component: () => import(/* webpackChunkName: "Hero" */ '../views/Hero.vue'),
+        props: true
+    },
+```
+
+```js
+    // server\routes\web\index.js 英雄详情简略
+    router.get('/heroes/:id', async (req, res) => {
+        const data = await Hero.findById(req.params.id).lean()
+        res.send(data)
+    })
+```
+### 3.21、 英雄详情页，后台编辑，增加缺少的英雄背景图和英雄关系
+```js
+// server\models\Hero.js 
+    // 3.21新增banner字段
+    banner: { type: String },
+
+    // admin\src\views\HeroEdit.vue
+              <el-form-item label="Banner">
+            <el-upload
+              class="avatar-uploader"
+              :action="$http.defaults.baseURL + '/upload'"
+              :show-file-list="false"
+              :headers="getAuthHeaders()"
+              :on-success="(res) => $set(model, 'banner', res.url)"
+              :before-upload="beforeAvatarUpload"
+            >
+              <img v-if="model.banner" :src="model.banner" class="avatar" />
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
+          </el-form-item>
+          ...
+        <!-- 3.21 增加英雄关系 -->
+        <el-tab-pane label="最佳搭档" name="partners">
+          <el-button
+            type="primary"
+            size="small"
+            @click="model.partners.push({})"
+            ><i class="el-icon-plus"></i> 添加英雄</el-button
+          >
+          <el-row type="flex" style="flex-wrap: wrap">
+            <el-col
+              :md="12"
+              v-for="(item, index) in model.partners"
+              :key="index"
+            >
+              <el-form-item label="英雄">
+                <el-select filterable v-model="item.hero">
+                  <el-option
+                    v-for="hero in heroes"
+                    :key="hero._id"
+                    :value="hero._id"
+                    :label="hero.name"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="描述">
+                <el-input type="textarea" v-model="item.description"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button
+                  type="warning"
+                  size="small"
+                  @click="model.parents.splice(index, 1)"
+                  >删除</el-button
+                ></el-form-item
+              >
+              <el-divider></el-divider>
+            </el-col>
+          </el-row>
+        </el-tab-pane>
+
+```
+### 3.22、 web端英雄详情页的实现
+
+
 
 ## 一、 入门
 1. 项目介绍

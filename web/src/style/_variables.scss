@@ -5,12 +5,15 @@ $colors: (
     'white': #fff,
     'black': #000,
    'dark':#222,
+  'blue': #4394e4,
    'grey':#999,
    'grey-1':#666,
     'info': #4b67af,
    'light':#f9f9f9,
    'dark-1':#343440,
-   'light-1': #d4d9de
+   'light-1': #d4d9de,
+   'blue-1': #1f3695,
+   'danger': #791a15,
 
 );
 $border-color: map-get($map:$colors , $key:'light-1' );

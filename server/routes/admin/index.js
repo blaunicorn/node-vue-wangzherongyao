@@ -101,7 +101,7 @@ module.exports = app => {
         // const modelName = require('inflection').classify(req.params.resource) // 通用crud时，转类名转为大写单数
         // const Model = require(`../../models/${modelName}`) // 通用crud时，增加通用模型
         // const Model = require(`../../models/${req.params.resource}`) // 通用crud时，增加通用模型
-        const limit = +req.query.limit || 10
+        const limit = +req.query.limit || 20
         // npm i inflection 此插件可以负责单复数的转换
         // 优化阶段，可以把populate关联取出
         const queryOptions = {}

@@ -7,7 +7,7 @@ module.exports = app => {
     // const Article = require('../../models/Article') // 这种要一个个引入相对麻烦些
     const mongoose = require('mongoose')// 另外一种方式是直接通过mongoose读取数据库
     // 使用模型
-    const Artice = mongoose.model('Article')
+    const Article = mongoose.model('Article')
     const Category = mongoose.model('Category')
     const Hero = mongoose.model('Hero')
 
@@ -68,7 +68,7 @@ module.exports = app => {
         // 热门分类，是独立于四个分类，新增的,不限制分类，条件是 子分类是那些 in操作符会筛选出字段值等于制定数组中任何值的文档
         cats.unshift({
             name: '热门',
-            newsList: await Artice.find().where({
+            newsList: await Article.find().where({
                 categories: { $in: subCats }
                 // 关联 categories字段，把_id拓展为名称
             }).populate('categories').limit(5).lean()
@@ -159,5 +159,28 @@ module.exports = app => {
         // })
         res.send(cats)
     })
+
+    // 文章详情
+    // :id 定义时是带冒号的形参
+    router.get('/articles/:id', async (req, res) => {
+        // console.log(req.params.id)
+        // 3.19 增加lean()变成纯粹的json对象
+        const data = await Article.findById(req.params.id).lean()
+        data.related = await Article.find().where({
+            // 不包含查询本身
+            // title: { $ne: data.categories.title }
+            // 包含查询本身
+            categories: { $in: data.categories }
+        }).limit(2)
+        res.send(data)
+    })
+
+    //英雄详情简略
+    router.get('/heroes/:id', async (req, res) => {
+        // 这里主要要关联调用，取出分类的名字，否则只是分类的_id
+        const data = await Hero.findById(req.params.id).populate('categories').lean()
+        res.send(data)
+    })
+
     app.use('/web/api', router)
 }

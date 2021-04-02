@@ -17,6 +17,9 @@ body {
 a {
     color: #999;
 }
+p {
+    line-height: 1.5em;
+}
 // width ,height
 .w-100 {
     width: 100%;
@@ -269,4 +272,12 @@ a {
     width: 1.8462rem;
     height: 1.8462rem;
   }
+}
+
+// 3.19 增加边框
+// borders
+@each $dir in (top,right,bottom,left) {
+    .border-#{$dir} {
+        border-#{dir}: 1px solid $border-color;
+    }
 }
