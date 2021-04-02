@@ -1,6 +1,7 @@
 ## 【全栈之巅】Node.js + Vue.js 全栈开发王者荣耀手机端官网和管理后台
 > 本项目是 学习[Bilibili 全栈之巅](https://space.bilibili.com/341919508) 视频教程相关源码和体会
 > https://gitee.com/blaunicorn/node-vue-wangzherongyao
+> https://github.com/blaunicorn/node-vue-wangzherongyao
 > 持续更新中... 
 
 ### 1.1 王者荣耀全栈开发部分截图
@@ -3317,8 +3318,105 @@ app.use('/', express.static(__dirname + '/wwwroot/web'))
  web端类似调整
 
 ### 4.2购买域名和服务器
+```
+// 远程登录 用户名 @分隔符 ip地址
+ssh root@192.168.1.1
+ls // 查看文件列表
+pwd  // 看当前所在目录
+cd /  // 进入/目录,根路径
+cd /etc  //进入etc目录
+cd ~ //进入自己个人文件夹
+```
 
+### 4.3 域名解析
+例子如下：
+想实现功能： 主机域名 test.topfullstack.com 指向 公网ip 47.52.220.250
 
+记录类型，一般 选择 A
+主机记录： test      .topfullstack.com
+记录值： 47.52.220.250  // 公网ip
+实际上 域名就是ip的别名
+
+### 4.4 Nginx安装和配置
+apt 或 yum
+apt show nginx 查看是否有nginx
+apt update 全部更新下软件包
+apt install nginx -y
+安装完后，rpm -qa | grep nginx 查看
+启动nginx：systemctl start nginx
+加入开机启动：systemctl enable nginx
+查看nginx的状态：systemctl status nginx
+
+### 4.5 安装MongoDB数据库
+apt install -y mongodb-server
+centos 安装
+vim /etc/yum.repos.d/mongodb-org-4.0.repo
+
+配置mongo的yum源
+
+[mongodb-org-4.0]  
+name=MongoDB Repository  
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.0/x86_64/  
+gpgcheck=1
+enabled=1  
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc 
+
+yum install mongodb-org
+安装mongo 
+
+已安装:
+mongodb-org.x86_64 0:4.0.6-1.el7
+作为依赖被安装:
+mongodb-org-mongos.x86_64 0:4.0.6-1.el7
+mongodb-org-server.x86_64 0:4.0.6-1.el7
+mongodb-org-shell.x86_64 0:4.0.6-1.el7
+mongodb-org-tools.x86_64 0:4.0.6-1.el7 
+
+rm -rf /etc/yum.repos.d/mongodb-org-4.0.repo
+安装完成后删除 
+
+vim /etc/mongod.conf
+
+开启远程访问
+把第30行bindIp: 127.0.0.1改为
+bindIp: 0.0.0.0
+
+firewall-cmd --zone=public --add-port=27017/tcp --permanent
+firewall-cmd --reload
+开放MongoDB默认的27017端口
+
+systemctl enable mongod
+加入开机启动
+systemctl start mongod
+启动
+mongo
+进入mongo命令行 
+show dbs 显示数据库
+exit 退出命令行
+另:
+mongo的账号密码不是全局的
+而是每个库都要单独设置
+
+### 4.6 安装git 方便同步代码
+apt install -y git  // 安装git
+
+ssh-keygen  一路回车，生成秘钥,复制下来，放在github的setting里
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+
+cat /root/.ssh/id_rsa.pub  查看 公钥  复制到github里
+
+### 4.7 nodejs npm 安装配置
+apt install -y npm
+
+npm config set registry https://registry.npm.taobao.org  //使用taobao镜像
+如果需要恢复成原来的官方地址只需要执行如下命令
+npm config set registry https://registry.npmjs.org
+
+如果nodejs 版本较低，可以用下面命令升级
+n stable 
+
+### 4.8 git拉取代码，安装pm2并启动项目
 
 ## 一、 入门
 1. 项目介绍
@@ -3397,3 +3495,18 @@ app.use('/', express.static(__dirname + '/wwwroot/web'))
 ## 五、进阶
 1. 使用免费SSL证书启用HTTPS安全连接
 1. 使用阿里云OSS云存储存放上传文件
+
+…or create a new repository on the command line
+echo "# node-vue-wangzherongyao" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/blaunicorn/node-vue-wangzherongyao.git
+git push -u origin main
+…or push an existing repository from the command line
+git remote add origin https://github.com/blaunicorn/node-vue-wangzherongyao.git
+git branch -M main
+git push -u origin main
+…or import code from another repository
+You can initialize this repository with code from a Subversion, Mercurial, or TFS project.
