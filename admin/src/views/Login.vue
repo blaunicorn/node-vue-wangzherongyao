@@ -50,11 +50,14 @@
   export default {
     data() {
       return {
-        model: {},
+        model: {
+          username: 'admin',
+          password: '11111111',
+        },
       };
     },
     created() {
-      this.model = {};
+      this.model = { username: 'admin', password: '11111111' };
     },
     methods: {
       async login() {

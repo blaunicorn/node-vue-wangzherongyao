@@ -2,7 +2,9 @@ import axios from 'axios'
 import Vue from 'vue'
 import router from './router/index'
 const http = axios.create({
-    baseURL: 'http://localhost:3000/web/api'
+    // 4.1 替换变量
+    baseURL: process.env.VUE_APP_API_URL || '/web/api'
+    // baseURL: 'http://localhost:3000/web/api'
 })
 // 2-19 请求拦截器，增加token header
 http.interceptors.request.use(config => {

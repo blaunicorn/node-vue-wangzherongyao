@@ -11,6 +11,10 @@ app.use(express.json())
 
 //静态文件托管后面的'/'不能写成 './' 
 app.use('/uploads', express.static(__dirname + '/uploads')) // 表示uploads为托管的静态文件夹,可以通过/uploads来访问
+//4.1 静态文件托管admin的打包文件, 访问路径为localhost:3000/admin   静态文件路径为/wwwroot/admin
+app.use('/admin', express.static(__dirname + '/wwwroot/admin'))
+// 4.1 静态文件托管web的打包文件, 访问路径为localhost:3000/   静态文件路径为/wwwroot/web
+app.use('/', express.static(__dirname + '/wwwroot/web'))
 
 // 引入数据库
 require('./plugins/db')(app)

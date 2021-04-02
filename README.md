@@ -3211,7 +3211,112 @@ JSON.stringify($$('.hero-nav > li').map(( li,i)=>{return {heros:$$('li',$$('.her
         </el-tab-pane>
 
 ```
-### 3.22、 web端英雄详情页的实现
+### 3.22、 web端英雄详情页的实现 web\src\views\Hero.vue
+```js
+    <!-- 注意banner应该是个背景图 -->
+    <div class="top" :style="{ 'background-image': `url(${model.banner})` }">
+      <!-- 3.22  d-flex flex-column让背景上的info变成垂直布局， 加h-100 让info保持与背景一样高，再用justify-content:end（变成垂直布局，就不是靠右而是靠底部了） -->
+      <div class="info text-white p-3 h-100 d-flex flex-column jc-end">
+        <div class="fs-sm">{{ model.title }}</div>
+        <h2 class="my-2">{{ model.name }}</h2>
+        <!-- map 循环转成数组，在用/分割 -->
+        <div class="fs-sm">
+          {{ model.categories.map((v) => v.name).join('/') }}
+        </div>
+        <div class="d-flex jc-between">
+          <!-- 右边还有皮肤数据，所以要把它转成d-flex，变成左右对齐，上面再增加一层， -->
+          <!-- ai-center 让scores 垂直对齐 -->
+          <div class="scores d-flex ai-center pt-2" v-if="model.scores">
+            <span>难度</span>
+            <span class="badge bg-primary">{{ model.scores.difficult }}</span>
+            <span>技能</span>
+            <span class="badge bg-blue-1">{{ model.scores.skills }}</span>
+            <span>攻击</span>
+            <span class="badge bg-danger">{{ model.scores.attack }}</span>
+            <span>生存</span>
+            <span class="badge bg-dark">{{ model.scores.survive }}</span>
+          </div>
+          <router-link to="/" tag="div" class="text-grey fs-sm"
+            >皮肤： 2 &gt;</router-link
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+```
+```js
+<style lang="scss" scoped>
+  // 限制在hero页面内，防止样式冲突
+  .page-hero {
+    .top {
+      // 没有高度不会显示
+      height: 50vw;
+      //   背景图不要重复，垂直向上靠，水平居中
+      background: #fff no-repeat top center;
+      // 限制高度100%
+      background-size: auto 100%;
+    }
+    .info {
+      // 增加渐变效果，全透明变到全黑
+      background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+      .scores {
+        .badge {
+          margin: 0 0.25rem;
+          display: inline-block;
+          width: 1rem;
+          height: 1rem;
+          line-height: 0.9rem;
+          text-align: center;
+          border-radius: 50%;
+          font-size: 0.6rem;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+      }
+    }
+  }
+</style>
+```
+
+### 4.1 生产环境编译
+把admin和web都编译到server的某个文件里，让他们能被server访问到
+```js
+npm run build // 直接编译
+npm install -g serve // npm下本机启动serve的全局
+serve dist 启动模拟服务器
+process.env.VUE_APP_API_URL // 必须VUE_APP开头 再加变量名
+```
+
+```js
+    // 4.1 admin\src\http.js 替换变量
+    baseURL: process.env.VUE_APP_API_URL || '/admin/api'
+    // baseURL: 'http://localhost:3000/web/api'
+```
+
+```
+// admin\.env.development
+VUE_APP_API_URL=http://localhost:3000/web/api
+```
+
+```
+ // admin\vue.config.js
+ module.exports = {
+
+    publicPath: process.env.NODE_ENV === 'production' ? '/admin/' : './',
+    // 输出到指定文件夹
+    // __dirname 指vue.config.js的当前文件夹，后面用..回退到server文件夹
+    outputDir: __dirname + '/../server/wwwroot/admin',
+    assetsDir: 'static'
+}
+```
+```
+//4.1 静态文件托管admin的打包文件, 访问路径为localhost:3000/admin   静态文件路径为/wwwroot/admin
+app.use('/admin', express.static(__dirname + '/wwwroot/admin'))
+// 4.1 静态文件托管web的打包文件, 访问路径为localhost:3000/   静态文件路径为/wwwroot/web
+app.use('/', express.static(__dirname + '/wwwroot/web'))
+```
+ web端类似调整
+
+### 4.2购买域名和服务器
 
 
 
