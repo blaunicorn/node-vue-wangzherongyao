@@ -175,7 +175,9 @@ module.exports = app => {
         // app.post('/admin/api/upload', upload.single('file'), async (req, res) => { // upload.singel('file) 接收单一文件，文件名为file
 
         const file = req.file // 是通过multer中间件增加的req.file对象
-        file.url = `http://localhost:3000/uploads/${file.filename}`
+        // 4.10 把图片访问地址改成线上地址
+        file.url = `http://39.97.105.248:3000/uploads/${file.filename}`
+        // file.url = `http://localhost:3000/uploads/${file.filename}`
         res.send(file)  // 返回前段需要定义一个静态的文件并把路径返回给前端
     })
     // 登录接口

@@ -3346,6 +3346,8 @@ apt install nginx -y
 启动nginx：systemctl start nginx
 加入开机启动：systemctl enable nginx
 查看nginx的状态：systemctl status nginx
+/usr/share/nginx/html html目录
+/etc/nginx/nginx.conf  配置文件，可用vim配置
 
 ### 4.5 安装MongoDB数据库
 apt install -y mongodb-server
@@ -3405,6 +3407,7 @@ Your identification has been saved in /root/.ssh/id_rsa.
 Your public key has been saved in /root/.ssh/id_rsa.pub.
 
 cat /root/.ssh/id_rsa.pub  查看 公钥  复制到github里
+ps 一定要把key添加到项目里部署公钥里，只允许部署，而不是个人设置里。
 
 ### 4.7 nodejs npm 安装配置
 apt install -y npm
@@ -3417,7 +3420,48 @@ npm config set registry https://registry.npmjs.org
 n stable 
 
 ### 4.8 git拉取代码，安装pm2并启动项目
+原始方法 ftp
+新方法 git 
+mkdir /data  服务器上在根目录建立data文件夹 
+cd /data  进入文件夹 
+ll 或ls 浏览文件夹下文件
+git clone git@github.com:blaunicorn/node-vue-wangzherongyao.git git克隆 即可根据公钥下载项目
+cd node-vue-wangzherongyao
+cd server
+npm i
+npm i -g pm2  pm2包可以后台运行nodejs
+pm2 start index.js 启动进程
+pm2 list 查看进程
+pm2 logs index  查看logs是什么
+pm2 start index.js —name app_name
+pm2 save 会将当前pm2所运行的应用保存在/root/.pm2/dump.pm2下运行pm2-root服务脚本，并且到/root/.pm2/dump.pm2下读取应用并启动。
+pm2 startup 即在/etc/init.d/目录下生成pm2-root的启动脚本，且自动将pm2-root设为服务。
+curl http://localhost:3000 查看页面
+curl http://localhost:3000/admin/ 查看后端页面
 
+  4.9 配置Nginx反向代理
+Remote - SSH  vscode安装ssh管理器
+ms-vscode-remote.remote-ssh
+https://www.digitalocean.com 模块化配置Nginx
+将配置好的文件拷贝到/etc/ngxin/文件夹下或者 配置  
+  # reverse proxy
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        include    nginxconfig.io/proxy.conf;
+    }
+
+service nginx reload 重载文件
+访问 ip 或域名 可打开首页
+
+### 4.10 迁移本地MongoDB数据库到服务器
+mongodump -d node-vue-moba
+生成dump文件夹
+mongoDb 4.4 把 工具类都分类去了，所以需要下载，覆盖到bin目录才能使用mongodump
+https://fastdl.mongodb.org/tools/db/mongodb-database-tools-windows-x86_64-100.3.1.zip
+另外，要在windows 系统变量里添加 mongoDb的bin执行文件夹，才能使用mongodb命令行
+
+在vscode 里 复制 dump文件夹 在vscode ssh页面粘贴 （注意，都要在vscode里)
+在终端 mongorestore 在服务器上恢复数据
 ## 一、 入门
 1. 项目介绍
 1. 工具安装和环境搭建(nodejs,npm,mongodb)
