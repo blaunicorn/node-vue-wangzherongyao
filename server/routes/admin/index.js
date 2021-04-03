@@ -176,7 +176,7 @@ module.exports = app => {
 
         const file = req.file // 是通过multer中间件增加的req.file对象
         // 4.10 把图片访问地址改成线上地址
-        file.url = `http://39.97.105.248:3000/uploads/${file.filename}`
+        file.url = `http://39.97.105.248/uploads/${file.filename}`
         // file.url = `http://localhost:3000/uploads/${file.filename}`
         res.send(file)  // 返回前段需要定义一个静态的文件并把路径返回给前端
     })
