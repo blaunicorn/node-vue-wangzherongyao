@@ -3462,6 +3462,10 @@ https://fastdl.mongodb.org/tools/db/mongodb-database-tools-windows-x86_64-100.3.
 
 在vscode 里 复制 dump文件夹 在vscode ssh页面粘贴 （注意，都要在vscode里)
 在终端 mongorestore 在服务器上恢复数据
+
+如果 代码修改了，pm2不会像node一样自动刷新，需要 pm2 reload index 重新加载 index为启动的name
+
+
 ## 一、 入门
 1. 项目介绍
 1. 工具安装和环境搭建(nodejs,npm,mongodb)
