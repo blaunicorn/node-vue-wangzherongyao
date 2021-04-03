@@ -3461,10 +3461,21 @@ https://fastdl.mongodb.org/tools/db/mongodb-database-tools-windows-x86_64-100.3.
 另外，要在windows 系统变量里添加 mongoDb的bin执行文件夹，才能使用mongodb命令行
 
 在vscode 里 复制 dump文件夹 在vscode ssh页面粘贴 （注意，都要在vscode里)
-在终端 mongorestore 在服务器上恢复数据
+mongorestore 在终端在服务器上恢复数据
 
+git pull origin master 服务器 拉取代码 
+pm2 reload index
 如果 代码修改了，pm2不会像node一样自动刷新，需要 pm2 reload index 重新加载 index为启动的name
 
+修改数据库数据 需下载 Robo 3T(MongoDB可视化工具)
+创建新的联接 
+ssh 联接远端服务器
+
+db.getCollection('items').find({}).map(doc=> {
+    doc.icon = doc.icon ? doc.icon.replace('localhost:3000','39.97.105.248') : null
+    db.items.save(doc)
+    return doc
+})
 
 ## 一、 入门
 1. 项目介绍
