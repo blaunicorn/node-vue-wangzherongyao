@@ -3470,12 +3470,51 @@ pm2 reload index
 修改数据库数据 需下载 Robo 3T(MongoDB可视化工具)
 创建新的联接 
 ssh 联接远端服务器
-
+修改 items集合中的图片的地址为 远端服务器
 db.getCollection('items').find({}).map(doc=> {
     doc.icon = doc.icon ? doc.icon.replace('localhost:3000','39.97.105.248') : null
     db.items.save(doc)
     return doc
 })
+
+修改 ads集合中的广告位图片的地址为 远端服务器
+db.getCollection('ads').find({}).map(doc => {
+    doc.items.map(item => {
+        item.image = item.image ? item.image.replace('localhost:3000','39.97.105.248'):null
+        return item })
+        db.ads.save(doc)
+        return doc
+    })
+
+### 5.1 使用免费ssl证书启动https安全
+let's Encrypt
+https://letsencrypt.org/
+https://certbot.eff.org/
+我的系统是centos的 所以需要安装Snap
+在CentOS 8上安装Snap
+添加EPEL存储库
+sudo dnf -y install https://dl.Fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo dnf -y upgrade
+sudo dnf -y install snapd
+sudo systemctl enable --now snapd.socket
+sudo ln -s /var/lib/snapd/snap /snap
+
+sudo snap install core
+sudo snap refresh core
+
+sudo yum remove certbot
+
+sudo snap install --classic certbot
+
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+sudo certbot --nginx
+
+sudo certbot certonly --nginx
+
+### 5.2 使用阿里云oss云储存存放上传文件
+npm install --save multer-aliyun-oss
+
 
 ## 一、 入门
 1. 项目介绍

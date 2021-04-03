@@ -169,13 +169,26 @@ module.exports = app => {
     // 处理上传文件
     // 增加中间件 npm i multer 
     const multer = require('multer') // 引入module 模块
+    // 5.2 引入阿里云云存储模块 需要收费，暂不实现
+    // const MAO = require('multer-aliyun-oss')
+    // const upload = multer({
+    //     storage: MAO({
+    //         config: {
+    //             region: '',
+    //             accessKeyId: '',
+    //             accessKeySecret: '',
+    //             bucket: ''
+    //         }
+    //     })
+    // })
+    // 5.2 改成阿里云云存储模块，去掉 
     const upload = multer({ dest: __dirname + '/../../uploads' })  // 定义一个中间件，并执行它,同时传递一个参数dest ，目标地址是哪里(当前文件夹 退两级) ， __dirname为绝对地址
     // 2-20 上传图片需要验证中间件
     app.post('/admin/api/upload', authMiddleware(), upload.single('file'), async (req, res) => { // upload.singel('file) 接收单一文件，文件名为file
         // app.post('/admin/api/upload', upload.single('file'), async (req, res) => { // upload.singel('file) 接收单一文件，文件名为file
 
         const file = req.file // 是通过multer中间件增加的req.file对象
-        // 4.10 把图片访问地址改成线上地址
+        // 4.10 把图片访问地址改成线上地址，注意没有端口号了，因为nginx启动了反向代理
         file.url = `http://39.97.105.248/uploads/${file.filename}`
         // file.url = `http://localhost:3000/uploads/${file.filename}`
         res.send(file)  // 返回前段需要定义一个静态的文件并把路径返回给前端
